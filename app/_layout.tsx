@@ -1,44 +1,47 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { toastConfig } from "@/toast.config";
+import "../api/url";
+import "../global.css";
+import "../i18n.config";
 
-import { useColorScheme } from '@/components/useColorScheme';
+import { useAuthStore } from "@/store/auth";
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
+import { useFonts } from 'expo-font';
+import { router, Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { useColorScheme } from "nativewind";
+import React, { useEffect } from 'react';
+import 'react-native-reanimated';
+import Toast from 'react-native-toast-message';
+
+
+const queryClient = new QueryClient()
 
 export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+  ErrorBoundary
 } from 'expo-router';
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+    JakartaBold: require('../assets/fonts/Jakarta/PlusJakartaSans-Bold.ttf'),
+    JakartaExtraBold: require('../assets/fonts/Jakarta/PlusJakartaSans-ExtraBold.ttf'),
+    JakartaLight: require('../assets/fonts/Jakarta/PlusJakartaSans-Light.ttf'),
+    JakartaMedium: require('../assets/fonts/Jakarta/PlusJakartaSans-Medium.ttf'),
+    JakartaSemiBold: require('../assets/fonts/Jakarta/PlusJakartaSans-SemiBold.ttf'),
+    Jakarta: require('../assets/fonts/Jakarta/PlusJakartaSans-Regular.ttf'),
   });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  const hasHydrated = useAuthStore.persist.hasHydrated();
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
+  if (!loaded || !hasHydrated) {
     return null;
   }
 
@@ -46,14 +49,38 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
+  const user = useAuthStore(s => s.user)
+  React.useEffect(() => {
+    if(user){
+      router.replace("/client/dashboard")
+    }else{
+      router.replace('/auth/otp-verification')
+    }
+    
+    SplashScreen.hideAsync();
+  }, [])
 
+  React.useEffect(() => {
+    if (colorScheme == "dark") {
+      setColorScheme("light")
+    }
+  }, [])
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    <>
+
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack initialRouteName="auth">
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
+            <Stack.Screen name="client" options={{ headerShown: false }} />
+          </Stack>
+        </ThemeProvider>
+      </QueryClientProvider>
+      <Toast config={toastConfig} />
+    </>
+
+
   );
 }
+
