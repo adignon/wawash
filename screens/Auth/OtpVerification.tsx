@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { Alert, View } from "react-native";
 import Toast from "react-native-toast-message";
 
-const country = {
+export const country = {
     code: "BJ",
     prefix: "+229"
 }
@@ -55,6 +55,7 @@ export function OtpVerification() {
                 }
             })
         } catch (e: any) {
+            
             if (e == "NEW_PHONE_ERROR") {
                 Alert.alert(t("Nouvel appareil"), t("Nous avons remarqué que vous étiez déjà conneté sur d'autre appareil. En continuant ici vous serez déconnecté de vos autres appareils."),[
                     {

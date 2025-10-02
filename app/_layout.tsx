@@ -3,7 +3,7 @@ import "../api/url";
 import "../global.css";
 import "../i18n.config";
 
-import { useAuthStore } from "@/store/auth";
+import { useStore } from "@/store/store";
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import {
   QueryClient,
@@ -14,9 +14,9 @@ import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from "nativewind";
 import React, { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
-
 
 const queryClient = new QueryClient()
 
@@ -36,7 +36,7 @@ export default function RootLayout() {
     JakartaSemiBold: require('../assets/fonts/Jakarta/PlusJakartaSans-SemiBold.ttf'),
     Jakarta: require('../assets/fonts/Jakarta/PlusJakartaSans-Regular.ttf'),
   });
-  const hasHydrated = useAuthStore.persist.hasHydrated();
+  const hasHydrated = useStore.persist.hasHydrated();
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -50,14 +50,14 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const { colorScheme, setColorScheme } = useColorScheme();
-  const user = useAuthStore(s => s.user)
+  const user = useStore(s => s.user)
   React.useEffect(() => {
-    if(user){
+    if (user) {
       router.replace("/client/dashboard")
-    }else{
+    } else {
       router.replace('/auth/otp-verification')
     }
-    
+
     SplashScreen.hideAsync();
   }, [])
 
@@ -67,18 +67,21 @@ function RootLayoutNav() {
     }
   }, [])
   return (
-    <>
+    <GestureHandlerRootView>
 
       <QueryClientProvider client={queryClient}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack initialRouteName="auth">
+          <Stack initialRouteName="auth" screenOptions={{
+            headerShown: false
+          }}>
             <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="client" options={{ headerShown: false }} />
+            <Stack.Screen name="nolayout" options={{ headerShown: false, animation: "fade_from_bottom" }} />
           </Stack>
         </ThemeProvider>
       </QueryClientProvider>
       <Toast config={toastConfig} />
-    </>
+    </GestureHandlerRootView>
 
 
   );

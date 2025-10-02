@@ -22,7 +22,7 @@ export const toastConfig = {
         {
           text2 ? (
             <View className="mt-2">
-              <Text className="font-jakarta text-[14px] text-text-dark">{text2}</Text>
+              <Text className="font-jakarta text-[14px] text-white  ">{text2}</Text>
             </View>
           ) : <></>
         }
@@ -38,7 +38,7 @@ export const toastConfig = {
         {
           text1 ? (
             <View>
-              <Text className="font-jakarta-semibold text-[15px] text-dark-text dark:text-white">{text1}</Text>
+              <Text className="font-jakarta-semibold text-[15px] text-white dark:text-white">{text1}</Text>
             </View>
           ):<></>
         }
@@ -46,7 +46,7 @@ export const toastConfig = {
         {
           text2 ? (
             <View className="mt-1 ">
-              <Text className="font-jakarta text-[14px] text-dark-text dark:text-white">{text2}</Text>
+              <Text className="font-jakarta text-[14px] text-white dark:text-white">{text2}</Text>
             </View>
           ) : <></>
         }

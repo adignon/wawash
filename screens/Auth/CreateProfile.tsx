@@ -6,7 +6,7 @@ import { ProfileInput } from "@/components/ProfileImage";
 import { SafeView } from "@/components/View";
 import { capitalize } from "@/helpler";
 import { useForm } from "@/hooks/useForm";
-import { useAuthStore } from "@/store/auth";
+import { useStore } from "@/store/store";
 import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
@@ -55,8 +55,8 @@ export function CreateProfile() {
                 }),
         },
     });
-     const setUser = useAuthStore((s) => s.setUser);
-     const setToken = useAuthStore((s) => s.setToken);
+     const setUser = useStore((s) => s.setUser);
+     const setToken = useStore((s) => s.setToken);
     const mutation = useMutation({
         mutationFn: createUserAccount,
         mutationKey: ["create-profile"]
@@ -92,7 +92,7 @@ export function CreateProfile() {
             })
             const data=result.user
             setUser(data)
-            setToken(result.acessToken)
+            setToken(result.acessToken.token)
             router.push({
                 pathname: "/auth/welcome",
                 params: {

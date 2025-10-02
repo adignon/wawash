@@ -5,7 +5,7 @@ import { TouchableOpacity, View } from "react-native";
 import { Path, Svg } from "react-native-svg";
 export function OtpVerifyCode() {
     const { phone, retryAt, token } = useLocalSearchParams<{ token: string, phone: string, retryAt: string }>()
-    const setUser = useAuthStore((s) => s.setUser);
+    const setUser = useStore((s) => s.setUser);
     const handleRetry = async () => {
         try {
             const data = await otpVerify({
@@ -23,7 +23,7 @@ export function OtpVerifyCode() {
             })
         }
     }
-    const setToken = useAuthStore((s) => s.setToken);
+    const setToken = useStore((s) => s.setToken);
     const handleSubmit = async (code: string) => {
         try {
             const data = await otpVerifyCode({
@@ -36,7 +36,7 @@ export function OtpVerifyCode() {
                 type: "success"
             })
             setUser(data.user)
-            setToken(data.acessToken)
+            setToken(data.acessToken.token)
             if (data.user) {
                 router.push({
                     pathname: "/auth/welcome",
@@ -154,7 +154,7 @@ import { Header } from "@/components/Header";
 import { Text } from "@/components/Themed";
 import { SafeView } from "@/components/View";
 import { capitalize, clx } from "@/helpler";
-import { useAuthStore } from "@/store/auth";
+import { useStore } from "@/store/store";
 import { theme } from "@/tailwind.config";
 import { router, useLocalSearchParams } from "expo-router";
 import { useColorScheme } from "nativewind";
