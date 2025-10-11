@@ -17,10 +17,19 @@ export function OtpVerifyCode() {
                 type: "success"
             })
         } catch (e: any) {
-            Toast.show({
-                text2: e,
-                type: "error"
-            })
+
+            if (typeof e === "string") {
+                Toast.show({
+                    text2: e,
+                    type: "error"
+                })
+            } else {
+                Toast.show({
+                    text2: t("Une erreur innatendue est survenue"),
+                    type: "error"
+                })
+            }
+
         }
     }
     const setToken = useStore((s) => s.setToken);
@@ -35,8 +44,11 @@ export function OtpVerifyCode() {
                 text1: data.message,
                 type: "success"
             })
-            setUser(data.user)
-            setToken(data.acessToken.token)
+            if (data.user) {
+                setUser(data.user)
+                setToken(data.acessToken.token)
+            }
+
             if (data.user) {
                 router.push({
                     pathname: "/auth/welcome",
@@ -55,10 +67,19 @@ export function OtpVerifyCode() {
             }
 
         } catch (e: any) {
-            Toast.show({
-                text2: e,
-                type: "error"
-            })
+            console.log(e)
+            if (typeof e == "string") {
+                Toast.show({
+                    text2: e,
+                    type: "error"
+                })
+            } else {
+                Toast.show({
+                    text2: t("Une erreur innatendue est survenue"),
+                    type: "error"
+                })
+            }
+
         }
     }
     return (

@@ -7,10 +7,6 @@ export default function Layout() {
         }}>
             <Stack.Screen name="how" />
             <Stack.Screen name="help" />
-            <Stack.Screen name="configure-adress" options={{
-                animation: "slide_from_bottom",
-                presentation:"modal"
-            }} />
         </Stack>
     )
 }

@@ -20,7 +20,8 @@ module.exports = {
                     100: "#EEEEEE",
                     200:"#DCDCDC",
                     400:"#C7C7C7",
-                    DEFAULT: "#ccc"
+                    DEFAULT: "#ccc",
+                    "dark":"#888888"
                 },
                 dark: {
                     300: "#828282",
@@ -56,12 +57,19 @@ module.exports = {
                     500: "#EB5757"
                 },
                 green: {
-                    DEFAULT: '#27C840'
+                    100:"#CBF3DC",
+                    400:"#20DF6C",
+                    DEFAULT: '#27C840',
+                    500:"#34C759",
+                    "dark-500":"#248A3D"
                 },
                 yellow: {
                     300: "#FFF6CB",
+                    400:"#FEBC2F",
                     "dark-300":"#3B3418",
                     400: "#FFE460",
+                    500:"#FEBC2F",
+                    "dark-500":"#946300ff",
                     DEFAULT: "#FFCB33",
                 }
             }

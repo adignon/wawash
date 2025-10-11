@@ -1,6 +1,6 @@
 import { clx } from "@/helpler";
 import { useThemeValue } from "@/hooks/useThemeValue";
-import { country } from "@/screens/Auth/OtpVerification";
+import { country } from "@/storage/config";
 import { theme } from "@/tailwind.config";
 import { BottomSheetFlatList, BottomSheetModal, BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { Image } from "expo-image";
@@ -98,7 +98,7 @@ export function InputPhoneNumber({ ...props }: IInputPhoneNumber) {
                 </View>
             }
             keyboardType="phone-pad"
-            {...props} 
+            {...props}
             value={formatedPhone.current}
             onChangeText={handleChangeText}
         />
@@ -154,7 +154,7 @@ interface ISearchableInput extends IInput {
 }
 export function SearchableInput({ data, listTitle, listDescription, ...props }: ISearchableInput & ISeachable) {
     const [text, setText] = React.useState("")
-    const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
+    const snapPoints = useMemo(() => ["50%", "90%"], []);
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
     const handlePresentModalPress = useCallback(() => {
         bottomSheetModalRef.current?.present();
@@ -263,5 +263,29 @@ export function SearchableInput({ data, listTitle, listDescription, ...props }: 
             </BottomSheetModal>
         </>
 
+    )
+}
+interface ICheckbox {
+    label: React.ReactNode,
+    onCheck: (x: boolean) => void,
+    check: boolean,
+    disabled?:boolean
+}
+export function Checkbox({ label,disabled, check, onCheck }: ICheckbox) {
+    return (
+        <TouchableOpacity disabled={disabled} onPress={() => onCheck(!check)} className={clx("flex-row", disabled&&"opacity-20")}>
+            <View className={clx("justify-center items-center w-[18px] h-[18px] rounded-[5px] ", check ? "bg-primary dark:bg-primary-500" : "border border-gray dark:border-dark-border")}>
+                {
+                    check && (
+                        <Svg width="9" height="8" viewBox="0 0 9 8" fill="none" >
+                            <Path d="M0.916667 5.16667L2.48309 6.34148C2.91178 6.663 3.51772 6.58946 3.85705 6.17472L8.5 0.5" stroke="white" strokeLinecap="round" />
+                        </Svg>
+                    )
+                }
+            </View>
+            <View className="flex-1">
+                {label}
+            </View>
+        </TouchableOpacity>
     )
 }

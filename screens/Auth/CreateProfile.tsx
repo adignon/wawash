@@ -13,12 +13,12 @@ import { useLocalSearchParams } from "expo-router/build/hooks";
 import { t } from "i18next";
 import Joi from "joi";
 import React from "react";
-import { View } from "react-native";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 export function CreateProfile() {
     const imageRef = React.useRef<string | undefined>(undefined)
-    const { phone, token } = useLocalSearchParams<{ phone: string, token:string }>()
+    const { phone, token } = useLocalSearchParams<{ phone: string, token: string }>()
     const { getValues, field, isFormValid } = useForm({
         firstname: {
             defaultValue: "",
@@ -55,8 +55,8 @@ export function CreateProfile() {
                 }),
         },
     });
-     const setUser = useStore((s) => s.setUser);
-     const setToken = useStore((s) => s.setToken);
+    const setUser = useStore((s) => s.setUser);
+    const setToken = useStore((s) => s.setToken);
     const mutation = useMutation({
         mutationFn: createUserAccount,
         mutationKey: ["create-profile"]
@@ -77,7 +77,7 @@ export function CreateProfile() {
                 const match = /\.(\w+)$/.exec(filename);
                 const type = match ? `image/${match[1]}` : `image`;
                 profileImage = {
-                    uri:imageRef.current,
+                    uri: imageRef.current,
                     name: filename,
                     type,
                 }
@@ -90,7 +90,7 @@ export function CreateProfile() {
                 profileImage,
                 token
             })
-            const data=result.user
+            const data = result.user
             setUser(data)
             setToken(result.acessToken.token)
             router.push({
@@ -101,46 +101,56 @@ export function CreateProfile() {
                 }
             })
         } catch (e: any) {
-            Toast.show({
-                text2: e,
-                type: "error"
-            })
+            if (typeof e == "string") {
+                Toast.show({
+                    text2: e,
+                    type: "error"
+                })
+            } else {
+                Toast.show({
+                    text2: t("Une erreur innatendue est survenue"),
+                    type: "error"
+                })
+            }
+
         }
     }
     return (
-        <SafeView safeZone="bottom" className="bg-light   flex-1">
-            <Header title={t("Créer votre profile")} />
-            <View className="flex-1">
-                <View className="mx-auto mt-6">
-                    <ProfileInput onImage={(file) => imageRef.current = file} />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 bg-white dark:bg-dark-bg">
+            <SafeView safeZone="bottom" className="bg-light   flex-1">
+                <Header title={t("Créer votre profile")} />
+                <ScrollView className="flex-1">
+                    <View className="mx-auto mt-6">
+                        <ProfileInput onImage={(file) => imageRef.current = file} />
+                    </View>
+                    <View className="px-4 gap-y-6 mt-6">
+                        <View>
+                            <Input
+                                {...field("firstname")}
+                                placeholder={t("Entrez votre nom de famille")}
+                                label={<InputLabel title={t("Nom de famille")} />}
+                            />
+                        </View>
+                        <View>
+                            <Input
+                                {...field("lastname")}
+                                placeholder={t("Entrez votre prénom")}
+                                label={<InputLabel title={t("Prénom")} />}
+                            />
+                        </View>
+                        <View>
+                            <Input
+                                {...field("email")}
+                                placeholder={t("Entrez votre email")}
+                                label={<InputLabel title={t("Email")} />}
+                            />
+                        </View>
+                    </View>
+                </ScrollView>
+                <View className="p-4">
+                    <Button.Primary loading={mutation.isPending} onPress={handleCreateProfile} disabled={!isFormValid().isValid} label={t("Créer mon profile")} />
                 </View>
-                <View className="px-4 gap-y-6 mt-6">
-                    <View>
-                        <Input
-                            {...field("firstname")}
-                            placeholder={t("Entrez votre nom de famille")}
-                            label={<InputLabel title={t("Nom de famille")} />}
-                        />
-                    </View>
-                    <View>
-                        <Input
-                            {...field("lastname")}
-                            placeholder={t("Entrez votre prénom")}
-                            label={<InputLabel title={t("Prénom")} />}
-                        />
-                    </View>
-                    <View>
-                        <Input
-                            {...field("email")}
-                            placeholder={t("Entrez votre email")}
-                            label={<InputLabel title={t("Email")} />}
-                        />
-                    </View>
-                </View>
-            </View>
-            <View className="p-4">
-                <Button.Primary loading={mutation.isPending} onPress={handleCreateProfile} disabled={!isFormValid().isValid} label={t("Créer mon profile")} />
-            </View>
-        </SafeView>
+            </SafeView>
+        </KeyboardAvoidingView>
     )
 }

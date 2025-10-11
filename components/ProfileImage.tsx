@@ -99,10 +99,19 @@ export default function ImagePickerWrapper({ onImage, children, image, setImage 
                 })
             }
         } catch (err) {
-            Toast.show({
-                type: "error",
-                text2: t('Echec lors de la sélection de l\'image')
-            })
+            if (typeof err === "string") {
+
+                Toast.show({
+                    type: "error",
+                    text2: t('Echec lors de la sélection de l\'image')
+                })
+
+            } else {
+                Toast.show({
+                    text2: t("Une erreur innatendue est survenue"),
+                    type: "error"
+                })
+            }
             Logger.error(err);
         }
     };

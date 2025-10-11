@@ -1,6 +1,7 @@
 import { Button } from "@/components/Button";
 import { Text } from "@/components/Themed";
 import { SafeView } from "@/components/View";
+import { useStore } from "@/store/store";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { t } from "i18next";
@@ -8,6 +9,7 @@ import { View } from "react-native";
 
 export function Welcome() {
     const { firstname, isNewUser } = useLocalSearchParams<{ firstname: string, isNewUser: string }>()
+    const user = useStore(s => s.user)
     return (
         <SafeView className="justify-center flex-1" style={{ marginTop: "-10%" }}>
             <View className="px-4 ">
@@ -39,7 +41,17 @@ export function Welcome() {
                 }
             </View>
             <View className="mt-8 px-4">
-                <Button.Primary onPress={()=>router.dismissTo("/client/dashboard")} fullwidth={false} label={t("Continuer")} />
+                <Button.Primary onPress={() => {
+                    if (user) {
+                        if (user?.role == "CLEANER") {
+                            router.dismissTo("/merchant/dashboard")
+                        } else {
+                            router.dismissTo("/client/dashboard")
+                        }
+                    }
+
+                }
+                } fullwidth={false} label={t("Continuer")} />
             </View>
         </SafeView>
     )

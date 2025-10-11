@@ -1,5 +1,4 @@
 import { clx } from "@/helpler";
-import { PackageModal } from "@/screens/Client/Packages";
 import { theme } from "@/tailwind.config";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
@@ -11,13 +10,11 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-na
 import Svg, { Circle, Path } from "react-native-svg";
 
 export default function Layout() {
-    const [show,setShow]=React.useState(false)
     return (
         <BottomSheetModalProvider>
-            <PackageModal show={show} onClose={()=>setShow(false)}  />
             <Tabs
                 tabBar={(props) => {
-                    return <CustomTabBar {...props} onShowModal={()=>setShow(true)} />
+                    return <CustomTabBar {...props} />
                 }}
                 screenOptions={{ headerShown: false }}
             >
@@ -31,7 +28,7 @@ export default function Layout() {
                     ),
                 }} />
 
-                <Tabs.Screen name="packages" options={{
+                <Tabs.Screen name="wallet" options={{
                     animation: "shift",
                     tabBarIcon: (props) => (
                         <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -76,7 +73,7 @@ export default function Layout() {
     )
 }
 
-export function CustomTabBar({ onShowModal,state, descriptors, navigation, insets }: BottomTabBarProps&{onShowModal:()=>void}) {
+export function CustomTabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
     const bubbleX = useSharedValue(0);
     const TAB_WIDTH = 47.5
     const PADDING = [7, 21, 95, 95 + 15]
@@ -135,7 +132,9 @@ export function CustomTabBar({ onShowModal,state, descriptors, navigation, inset
                 />
             </View>
             <View className="absolute left-1/2 -translate-x-1/2 -translate-y-1/4" style={{ zIndex: 15 }} >
-                <Pressable onPress={onShowModal} className=" relative w-[60px] h-[60px] justify-center items-center bg-primary-200 dark:bg-primary-dark-200 rounded-full">
+                <Pressable onPress={()=>{
+                    
+                }} className=" relative w-[60px] h-[60px] justify-center items-center bg-primary-200 dark:bg-primary-dark-200 rounded-full">
                     <Svg width="30" height="30" viewBox="0 0 30 30" fill="none" >
                         <Path d="M15 7.5L15 22.5" stroke="white" strokeWidth="2" strokeLinecap="round" />
                         <Path d="M22.5 15L7.5 15" stroke="white" strokeWidth="2" strokeLinecap="round" />

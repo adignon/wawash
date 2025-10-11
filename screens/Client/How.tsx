@@ -149,7 +149,13 @@ export function How() {
         <View className="bg-light dark:bg-dark-bg flex-1" >
             <Header title={t("Comment ça marche ?")} />
             <ScrollView className="flex-1">
-                <View className="mt-4"  style={{ marginBottom: bottom + 20 }}>
+                <View className="absolute left-11 top-[80px]">
+                    <Svg width="2" height="1180" viewBox="0 0 2 1250" fill="none">
+                        <Line x1="1.00806" y1="1250.01" x2="1.00806" y2="-0.0051539" stroke="#06ADC9" strokeDasharray="10 10" />
+                    </Svg>
+
+                </View>
+                <View className="mt-4" style={{ marginBottom: bottom + 20 }}>
                     {
                         hows.map((h) =>
                             <View key={h.title} className="p-4">
@@ -161,12 +167,7 @@ export function How() {
                         <Button.Primary className="bg-primary-dark" label={t("Commander maintenant")} />
                     </View>
                 </View>
-                <View className="absolute left-11 top-[80px]">
-                    <Svg width="2" height="1180" viewBox="0 0 2 1250" fill="none">
-                        <Line x1="1.00806" y1="1250.01" x2="1.00806" y2="-0.0051539" stroke="#06ADC9" strokeDasharray="10 10" />
-                    </Svg>
 
-                </View>
             </ScrollView>
 
         </View>
@@ -188,7 +189,7 @@ const HowSection = ({ icon, title, description, bgColorClassName, image }: IHowP
                 </View>
                 <View className="flex-1 ">
                     <View className="gap-y-3">
-                        <Text className="text-[18px] text-dark dark:text-gray-100 font-jakarta-semibold">{t(title)}</Text>
+                        <Text className="text-[18px] text-dark dark:text-white font-jakarta-semibold">{t(title)}</Text>
                         <Text className="text-[14px] font-jakarta text-dark dark">{description}</Text>
                     </View>
                     <View className={clx("mt-6 relative h-[175px] rounded-[30px]", bgColorClassName)}>

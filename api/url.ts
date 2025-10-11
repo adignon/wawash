@@ -6,7 +6,6 @@ axios.interceptors.request.use(async config => {
     config.baseURL = process.env.EXPO_PUBLIC_API_URL + "/api"
     config.headers["X-device-id"] = await getDeviceToken()
     config.headers.Authorization = `Bearer ${useStore.getState().accessToken}`
-    console.log(await getDeviceToken(), useStore.getState().accessToken)
     return config
 }, error => {
     return Promise.reject(error);

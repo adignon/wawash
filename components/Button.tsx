@@ -8,10 +8,11 @@ import { Pressable, TouchableNativeFeedback, TouchableNativeFeedbackProps, View 
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { Text } from "./Themed";
 interface IButton extends TouchableNativeFeedbackProps {
-    label?: string,
+    label?: string|React.ReactNode,
     loading?: boolean,
     disabled?: boolean,
-    fullwidth?: boolean
+    fullwidth?: boolean,
+    children?:React.ReactNode
 }
 export function Button({ disabled, fullwidth = true, loading, children, className, label, ...props }: IButton) {
     const { t } = useTranslation()
@@ -20,8 +21,11 @@ export function Button({ disabled, fullwidth = true, loading, children, classNam
         <TouchableNativeFeedback className="" disabled={isDisabled} {...props}>
             <View className={clx(!fullwidth && "flex-row", "justify-center")}>
                 <View className={clx("relative p-4 rounded-[15px] overflow-hidden ", className)} {...props}>
+                    {
+                        children
+                    }
                     {label && (
-                        <Text className={clx("text-center text-[16px] font-jakarta-medium text-white ", isDisabled ? "text-gray-400 dark:text-dark-300" : "")}>{t(label)}</Text>
+                        <Text className={clx("text-center text-[16px] font-jakarta-medium text-white ", isDisabled ? "text-gray-400 dark:text-dark-300" : "")}>{label}</Text>
                     )}
                     {
                         loading ? (
@@ -40,12 +44,12 @@ export function Button({ disabled, fullwidth = true, loading, children, classNam
     )
 }
 
-Button.Primary = ({ ...props }: IButton) => {
-    return <Button className={clx(props.disabled ? 'bg-gray-300 dark:bg-dark-lighter' : "bg-primary", props.className)} {...props} />
+Button.Primary = ({ className,...props }: IButton) => {
+    return <Button className={clx(props.disabled ? 'bg-gray-300 dark:bg-dark-lighter' : "bg-primary dark:bg-primary-500", className)} {...props} />
 }
 
 
-export function SwitcherButton({ label, onShow, show }: { show: boolean, isActive?: boolean, label?: string | React.ReactNode, onShow: (state: boolean) => void }) {
+export function SwitcherButton({ label, onShow, show }: { show: boolean, label?: string | React.ReactNode, onShow: (state: boolean) => void }) {
     const progress = useSharedValue(0)
     const {colorScheme}=useColorScheme()
     const containerStyle = useAnimatedStyle(() => ({

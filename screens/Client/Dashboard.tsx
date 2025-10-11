@@ -1,16 +1,20 @@
+import { getAdress } from '@/api/subscription';
 import { NotificationButton } from '@/components/Header';
 import { Logo } from '@/components/Logo';
 import { ProfileImage } from '@/components/ProfileImage';
 import { Text } from '@/components/Themed';
 import { capitalize, clx } from '@/helpler';
 import { useStore } from '@/store/store';
+import { IAddress } from '@/store/type';
 import { theme } from '@/tailwind.config';
+import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Href, router } from 'expo-router';
 import { t } from 'i18next';
 import { useColorScheme } from 'nativewind';
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { useMemo } from 'react';
+import { Pressable, ScrollView, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from 'react-native-svg';
 
@@ -18,6 +22,22 @@ export function Dashboard() {
     const { top } = useSafeAreaInsets()
     const { colorScheme } = useColorScheme()
     const user = useStore(s => s.user)
+    const storedAdress = useStore(s => s.address)
+    const query = useQuery({
+        queryKey: ["adress"],
+        queryFn: getAdress
+    })
+    const adress = useMemo(() => {
+        if (query.data) {
+            return {
+                ...query.data,
+                location: query.data.coord,
+                addLocation: Boolean(query.data.coord ?? null)
+            }
+        } else {
+            return storedAdress
+        }
+    }, [query.data, storedAdress])
     const services = [
         {
             title: (
@@ -38,11 +58,13 @@ export function Dashboard() {
                     }}
                 />
             ),
+            href: '/nolayout/client/package-details?code=lessive_unique&title=Lessive unique&unique=true' as Href,
             color: theme.extend.colors.yellow[400],
             bgColor: colorScheme == "light" ? theme.extend.colors.yellow[300] : theme.extend.colors.yellow['dark-300']
         },
         {
             title: t("Lessive par abonnement"),
+            href: "/client/packages" as Href,
             image: (
                 <Image
                     className='absolute -bottom-2 left-2'
@@ -91,56 +113,61 @@ export function Dashboard() {
         <View className='bg-primary flex-1'>
             <View className="bg-white flex-1 dark:bg-dark-bg" style={{}}>
                 <View className='flex-1'>
-                    <LinearGradient
-                        colors={
-                            colorScheme == "light" ?
-                                [
-                                    '#035E6E',
-                                    '#04788C',
-                                    '#0589A0',
-                                    '#06B6D4',
-                                    '#06B6D4']
-                                :
+                    <View style={{
+                        borderBottomStartRadius: 30,
+                        borderBottomRightRadius: 30,
+                        overflow: "hidden"
+                    }}>
+                        <LinearGradient
+                            colors={
+                                colorScheme == "light" ?
+                                    [
+                                        '#035E6E',
+                                        '#04788C',
+                                        '#0589A0',
+                                        '#06B6D4',
+                                        '#06B6D4']
+                                    :
 
-                                [
-                                    '#012B36', // deep teal
-                                    '#024450', // dark cyan
-                                    '#036370', // medium teal
-                                    '#048094', // brighter accent (keeps identity)
-                                ]
-                        }
-                        locations={[0, 0.33, 0.33, 0.57, 1]}
-                        start={{ x: 0, y: 0.3 }}
-                        end={{ x: 1, y: 1 }}
-                        style={{
-                            paddingTop: top,
-                            borderBottomStartRadius: 30,
-                            borderBottomRightRadius: 30,
-                        }}
-                    >
-                        <View className='px-5'>
-                            <View>
-                                <View className='flex-row items-center justify-between  py-2'>
-                                    <Logo />
-                                    <NotificationButton count={1} />
+                                    [
+                                        '#012B36', // deep teal
+                                        '#024450', // dark cyan
+                                        '#036370', // medium teal
+                                        '#048094', // brighter accent (keeps identity)
+                                    ]
+                            }
+                            locations={[0, 0.33, 0.33, 0.57, 1]}
+                            start={{ x: 0, y: 0.3 }}
+                            end={{ x: 1, y: 1 }}
+                            style={{
+                                paddingTop: top,
+
+                            }}
+                        >
+                            <View className='px-5'>
+                                <View>
+                                    <View className='flex-row items-center justify-between  py-2'>
+                                        <Logo />
+                                        <NotificationButton count={1} />
+                                    </View>
+                                </View>
+                                <View className=' mt-4 mb-6'>
+                                    <ProfileImage
+                                        imageUrl={user?.imageFullUrl}
+                                        height={70}
+                                        width={70}
+                                        icon={false}
+                                    />
+                                    <View className='mt-4'>
+                                        <Text className='text-[18px] font-jakarta text-white dark:text-gray-100'>{t("Bienvenue,")}</Text>
+                                        <Text className='text-[25px] font-jakarta-semibold text-white'>{capitalize(user?.firstname)} {capitalize(user?.lastname)}</Text>
+                                    </View>
                                 </View>
                             </View>
-                            <View className=' mt-4 mb-6'>
-                                <ProfileImage
-                                    imageUrl={user?.imageFullUrl}
-                                    height={70}
-                                    width={70}
-                                    icon={false}
-                                />
-                                <View className='mt-4'>
-                                    <Text className='text-[18px] font-jakarta text-white dark:text-gray-100'>{t("Bienvenue,")}</Text>
-                                    <Text className='text-[25px] font-jakarta-semibold text-white'>{capitalize(user?.firstname)} {capitalize(user?.lastname)}</Text>
-                                </View>
-                            </View>
-                        </View>
-                    </LinearGradient>
+                        </LinearGradient>
+                    </View>
                     <ScrollView className='flex-1'>
-                        <View style={{ marginBottom: bottom + 90 }}>
+                        <View style={{ marginBottom: bottom + 120 }}>
                             <View>
                                 <View className='w-[250px] mx-4 mt-5'>
                                     <Text className='font-jakarta-medium text-[20px] font-dark-text dark:text-white'>
@@ -158,13 +185,14 @@ export function Dashboard() {
                                                 color={s.color}
                                                 title={s.title}
                                                 image={s.image}
+                                                href={s.href}
                                             />
                                         </View>
                                     ))
                                 }
                             </View>
                             <View className='m-4'>
-                                <EmplacementConfiguration />
+                                <EmplacementConfiguration adress={adress} />
                             </View>
                             <View className='gap-y-10 px-4 mt-4'>
                                 <View key={"line"} className='border-t border-gray-200 dark:border-dark-lighter'></View>
@@ -185,30 +213,36 @@ interface IServiceCard {
     containerClass?: string,
     color: string;
     bgColor: string;
+    href: Href
 }
 const ServiceCard = ({
     containerClass,
     image,
     title,
     color,
-    bgColor
+    bgColor,
+    href
 }: IServiceCard) => {
     return (
-        <View className={clx('p-4 overflow-hidden relative h-[170px] rounded-[20px]', containerClass)} style={{ backgroundColor: bgColor }}>
+        <Pressable onPress={() => router.push(href)} className={clx('p-4 overflow-hidden relative h-[170px] rounded-[20px]', containerClass)} style={{ backgroundColor: bgColor }}>
             <Text className='font-jakarta-semibold text-[18px] text-dark-text dark:text-white'>{title}</Text>
             {image}
-            <TouchableOpacity style={{ backgroundColor: color }} className='absolute bottom-5 right-5 h-[40px] w-[40px] justify-center items-center rounded-full'>
+            <View style={{ backgroundColor: color }} className='absolute bottom-5 right-5 h-[40px] w-[40px] justify-center items-center rounded-full'>
                 <Svg width="8" height="14" viewBox="0 0 8 14" fill="none">
                     <Path d="M1.68253 12.9401L6.5725 8.05007C7.15 7.47257 7.15 6.52757 6.5725 5.95007L1.68253 1.06006" stroke="#333333" strokeWidth="1.5" stroke-miterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
                 </Svg>
-            </TouchableOpacity>
-        </View>
+            </View>
+        </Pressable>
     )
 }
 
-const EmplacementConfiguration = () => {
+const EmplacementConfiguration = ({ adress }: { adress: IAddress }) => {
+    const setAdress = useStore(s => s.setAddress)
     return (
-        <TouchableOpacity onPress={()=>router.push("/nolayout/client/configure-adress")} className='flex-row items-center bg-primary-dark dark:bg-primary-dark-dark rounded-[20px] p-4 px-5 gap-x-4'>
+        <TouchableOpacity onPress={() => {
+            setAdress(adress)
+            router.push("/modal/configure-adress")
+        }} className='flex-row items-center bg-primary-dark dark:bg-primary-dark-dark rounded-[20px] p-4 px-5 gap-x-4'>
             <View className='w-[40px] h-[40px] bg-primary dark:bg-primary-base-dark rounded-full justify-center items-center'>
                 <Svg width="20" height="21" viewBox="0 0 20 21" fill="none" >
                     <Path d="M10 11.6916C11.4359 11.6916 12.6 10.5276 12.6 9.09164C12.6 7.6557 11.4359 6.49164 10 6.49164C8.56406 6.49164 7.4 7.6557 7.4 9.09164C7.4 10.5276 8.56406 11.6916 10 11.6916Z" stroke="white" />
@@ -217,8 +251,8 @@ const EmplacementConfiguration = () => {
 
             </View>
             <View className='gap-y-1 flex-1'>
-                <Text className='font-jakarta-semibold text-[16px] text-white'>{t("Configurer votre emplacement ")}</Text>
-                <Text className='text-[14px] text-white font-jakarta'>{t("Enrégistrez le lieu de récupération de vos linges")}</Text>
+                <Text className='font-jakarta-semibold text-[16px] text-white'>{adress ? t("Votre emplacement actuel") : t("Configurer votre emplacement ")}</Text>
+                <Text className='text-[14px] text-white font-jakarta' numberOfLines={1} ellipsizeMode="tail" >{adress ? `${capitalize(adress.quartier)}, ${capitalize(adress.arrondissement)}, ${capitalize(adress.commune)}, ${capitalize(adress.department)}` : t("Enrégistrez le lieu de récupération de vos linges")}</Text>
             </View>
             <View>
                 <Svg width="12" height="7" viewBox="0 0 12 7" fill="none">

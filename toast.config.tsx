@@ -10,7 +10,7 @@ export const toastConfig = {
       <View className=" " style={{ width: 30, height: 30 }}>
         <LottieView autoPlay loop={false} style={{ flex: 1 }} source={require("@/assets/lotties/success.json")} />
       </View>
-      <View style={{ marginLeft: 10, paddingLeft:10 }}>
+      <View style={{ marginLeft: 10, paddingLeft:20, flex:1 }}>
         {
           text1 ? (
             <View>
@@ -21,7 +21,7 @@ export const toastConfig = {
 
         {
           text2 ? (
-            <View className="mt-2">
+            <View className="mt-2 mr-2">
               <Text className="font-jakarta text-[14px] text-white  ">{text2}</Text>
             </View>
           ) : <></>
@@ -34,7 +34,7 @@ export const toastConfig = {
       <View className=" " style={{ width: 30, height: 30 }}>
         <LottieView autoPlay loop={false} style={{ flex: 1 }} source={require("@/assets/lotties/error.json")} />
       </View>
-      <View style={{ marginLeft: 5 , paddingLeft:10}}>
+      <View style={{ marginLeft: 5 , paddingLeft:20, flex:1}}>
         {
           text1 ? (
             <View>
@@ -45,7 +45,7 @@ export const toastConfig = {
 
         {
           text2 ? (
-            <View className="mt-1 ">
+            <View className=" mt-1 mr-2">
               <Text className="font-jakarta text-[14px] text-white dark:text-white">{text2}</Text>
             </View>
           ) : <></>

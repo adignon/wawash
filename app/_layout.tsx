@@ -18,6 +18,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 
+
 const queryClient = new QueryClient()
 
 export {
@@ -53,7 +54,12 @@ function RootLayoutNav() {
   const user = useStore(s => s.user)
   React.useEffect(() => {
     if (user) {
-      router.replace("/client/dashboard")
+      if(user.role=="CLEANER"){
+         router.replace("/merchant/dashboard")
+      }else{
+         router.replace("/client/dashboard")
+      }
+     
     } else {
       router.replace('/auth/otp-verification')
     }
@@ -62,8 +68,8 @@ function RootLayoutNav() {
   }, [])
 
   React.useEffect(() => {
-    if (colorScheme == "dark") {
-      setColorScheme("light")
+    if (colorScheme == "light") {
+      setColorScheme("dark")
     }
   }, [])
   return (
@@ -76,7 +82,8 @@ function RootLayoutNav() {
           }}>
             <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="client" options={{ headerShown: false }} />
-            <Stack.Screen name="nolayout" options={{ headerShown: false, animation: "fade_from_bottom" }} />
+            <Stack.Screen name="nolayout" />
+            <Stack.Screen name="modal/configure-adress" options={{ headerShown: false,  animation: "fade_from_bottom" }} />
           </Stack>
         </ThemeProvider>
       </QueryClientProvider>
