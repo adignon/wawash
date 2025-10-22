@@ -10,14 +10,18 @@ interface IHeader extends ViewProps {
     transparent?:boolean,
     textProps?: TextProps,
     title?: React.ReactNode | string,
-    backButton?: React.ReactNode
+    backButton?: React.ReactNode,
+    right?:React.ReactNode
 }
-export function Header({ backButton, transparent,textProps: { className: textClass, ...tP } = {}, title, className, ...props }: IHeader) {
+export function Header({ backButton,right, transparent,textProps: { className: textClass, ...tP } = {}, title, className, ...props }: IHeader) {
     return (
-        <SafeView  transparent safeZone="top" className="">
-            <View className={clx("px-4 py-2 flex-row items-center gap-x-4", className)}{...props}>
+        <SafeView  transparent safeZone="top" className=" flex-row items-center">
+            <View className={clx("flex-1 px-4 py-2 flex-row items-center gap-x-4", className)}{...props}>
                 {backButton ?? <BackButton />}
                 <Text className={clx("font-jakarta-bold text-dark text-[20px] dark:text-white", textClass)} {...tP}>{title}</Text>
+            </View>
+            <View className="px-4">
+                {right}
             </View>
         </SafeView>
     )

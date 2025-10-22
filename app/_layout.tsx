@@ -37,11 +37,10 @@ export default function RootLayout() {
     JakartaSemiBold: require('../assets/fonts/Jakarta/PlusJakartaSans-SemiBold.ttf'),
     Jakarta: require('../assets/fonts/Jakarta/PlusJakartaSans-Regular.ttf'),
   });
-  const hasHydrated = useStore.persist.hasHydrated();
+  const hasHydrated = useStore.persist.hasHydrated() || useStore.getState().user;
   useEffect(() => {
     if (error) throw error;
   }, [error]);
-
   if (!loaded || !hasHydrated) {
     return null;
   }
@@ -54,12 +53,12 @@ function RootLayoutNav() {
   const user = useStore(s => s.user)
   React.useEffect(() => {
     if (user) {
-      if(user.role=="CLEANER"){
-         router.replace("/merchant/dashboard")
+      if (user.role == "CLIENT") {
+        router.replace("/client/dashboard")
       }else{
-         router.replace("/client/dashboard")
+         router.replace("/merchant/dashboard")
       }
-     
+
     } else {
       router.replace('/auth/otp-verification')
     }
@@ -67,23 +66,19 @@ function RootLayoutNav() {
     SplashScreen.hideAsync();
   }, [])
 
-  React.useEffect(() => {
-    if (colorScheme == "light") {
-      setColorScheme("dark")
-    }
-  }, [])
   return (
     <GestureHandlerRootView>
 
       <QueryClientProvider client={queryClient}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack initialRouteName="auth" screenOptions={{
+          <Stack initialRouteName={user ? (user.role=="CLEANER" ? "merchant":"client") :"auth"} screenOptions={{
             headerShown: false
           }}>
             <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="client" options={{ headerShown: false }} />
+            <Stack.Screen name="merchant" options={{ headerShown: false }} />
             <Stack.Screen name="nolayout" />
-            <Stack.Screen name="modal/configure-adress" options={{ headerShown: false,  animation: "fade_from_bottom" }} />
+            <Stack.Screen name="modal/configure-adress" options={{ headerShown: false, animation: "fade_from_bottom" }} />
           </Stack>
         </ThemeProvider>
       </QueryClientProvider>

@@ -186,14 +186,14 @@ export function SubscriptionForm() {
     }
     const totalKg = useMemo(() => (params?.kg) ? Number(params.kg) * NUMBER_OF_WEEK : 'total ', [params?.kg])
     const { user, setUser } = useStore(s => s)
-    React.useEffect(() => {
-        if (command?.commandType == "SUBSCRIPTION" && command?.invoice.status == "SUCCESS" && user && user?.activeSubscription?.id != command.id) {
+    const updateUser=(command:ICommand)=>{
+         if ( command?.invoice.status == "SUCCESS" ) {
             setUser({
                 ...user,
-                activeSubscription: command
-            })
+                activeSubscription: command 
+            } as any)
         }
-    }, [command])
+    }
 
     const allowCancel = React.useRef(false)
     const handleSubmit = async (retry: boolean = true) => {
@@ -225,6 +225,7 @@ export function SubscriptionForm() {
                 })
                 commandSavedData.current = data.command
                 setCommand(data.command)
+                updateUser(data.command)
                 if (data.paymentUrl) {
                     Linking.openURL(data.paymentUrl)
                 }
@@ -233,6 +234,7 @@ export function SubscriptionForm() {
             const data: any = await mutation.mutateAsync(values)
             commandSavedData.current = data.command
             setCommand(data.command)
+            updateUser(data.command)
             Linking.openURL(data.paymentUrl)
         } catch (e: any) {
             console.log(e)
@@ -436,7 +438,6 @@ export function SubscriptionForm() {
                         if (command?.invoice.status == "SUCCESS") {
                             router.dismissTo("/client/packages")
                         } else if (order) {
-                            console.log(JSON.stringify(order, null, 3))
                             router.dismissTo({
                                 pathname: "/nolayout/client/order",
                                 params: {
@@ -763,7 +764,7 @@ export const PaymentModal = ({
     pendingTitle?: string,
     actionTitle?: string,
     title?: string,
-    retryFailed: any,
+    retryFailed?: any,
     description?: string,
     routerBack?: boolean,
     handleClose: () => void,
@@ -772,7 +773,7 @@ export const PaymentModal = ({
     onResult?: (x: any) => void,
     open: boolean,
     onClose: () => void,
-    status?: "pending" | "success" | "failed",
+    status?: "pending" | "success" | "failed"|"created",
     params?: any
 }) => {
     const { t } = useTranslation()
@@ -793,7 +794,7 @@ export const PaymentModal = ({
                     </TouchableOpacity>
                 </View>
                 {
-                    status == "pending" ? (
+                    status == "pending" || status=="created" ? (
                         <>
                             <View className="flex-1 justify-end mt-15">
                                 <View style={{ borderRadius: 100, width: 130, height: 130, justifyContent: "center", alignItems: "center" }} className="bg-yellow-100 dark:bg-yellow-dark-300">
@@ -925,7 +926,9 @@ export function VerifyTransactionStatus({ verificationPending, verifyTransaction
                     setCurrentTime(prev => current)
                     clearInterval(intervalRef.current!)
                     intervalRef.current = null
-                    if (!verification.current) handleVerify()
+                    if (!verification.current) {
+                        //handleVerify()
+                    }
                     counter.current += 1
                 }
             }, 1000)

@@ -103,7 +103,7 @@ export async function verifyTransaction(request: { subscriptionId: number, retry
     }
 }
 
-export async function getHistories(): Promise<Addons> {
+export async function getHistories(): Promise<IOrder[]> {
     try {
         const { data } = await axios.get("/histories")
         return data

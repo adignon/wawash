@@ -6,6 +6,7 @@ export type User = {
   lastname: string,
   role: "CLIENT" | "CLEANER" | "ADMIN"
   imageUrl: string;
+  merchantId?: number,
   imageFullUrl: string;
   activeSubscription?: ICommand | null
 };
@@ -29,25 +30,26 @@ export type IAddress = {
 
 export interface IOrder {
   id: number,
-  invoiceId:number,
-  invoice:IInvoice,
-  orderId:string,
+  invoiceId: number,
+  invoice: IInvoice,
+  orderId: string,
   pickingHours: [string, string]
-  executionDuration?:number,
-  orderTitle:string,
-  status: "CREATED" | "STARTED" | "PICKED" | "WASHING" | "DELIVERED" | "CANCELED"|"READY"
+  executionDuration?: number,
+  orderTitle: string,
+  status: "CREATED" | "STARTED" | "PICKED" | "WASHING" | "DELIVERED" | "CANCELED" | "READY" | "NOTEXECUTED" | "REJETED"
   deliveryDate: string
-  hasStarted?:boolean,
+  hasStarted?: boolean,
   capacityKg: number
   userKg?: number
-  customerOrderKgPrice?:number,
+  customerOrderKgPrice?: number,
   commandExecutionIndex: number
   orderExecutionIndex: number
   addons?: { [x: string]: { unitCost: number, totalCost: number } }
   initialExecutionCost?: number
   finalExecutionCost?: number
-  toPayExecutionFees?: number
-  merchantKgCost?: number
+  customerFeesToPay?: number
+  merchantPaymentStatus?: "PENDING" | "REVERSED"
+  merchantKgCost: number
   deliveryCost: number
   merchantTotalCost?: number
   deliveryType: "SHIPPING_DEFAULT" | "SHIPPING_FAST" | "SHIPPING_PRIORITIZED"
@@ -58,9 +60,9 @@ export interface IOrder {
   user: IUser
   merchantId?: number
   createdAt: string
-  package:IPackage,
+  package: IPackage,
   updatedAt: string
-  orderType:"SUBSCRIPTION"| "COMMAND"
+  orderType: "SUBSCRIPTION" | "COMMAND"
 }
 
 export type IPackage = {
@@ -77,6 +79,11 @@ export type IPackage = {
   };
   name: string;
   updatedAt: string;
+}
+
+export type IMerchant = {
+  balance: number,
+  id: string
 }
 export interface IServiceMeta {
   id: string,
@@ -110,7 +117,7 @@ export interface IInvoice {
 export interface ICommand {
   id: number;
   commandType: string;
-  commandDescription:string,
+  commandDescription: string,
   packageId: number,
   totalExecution: number;
   nextOrderAt: string;
@@ -128,4 +135,63 @@ export interface ICommand {
   endAt: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface IPaymentAdress {
+  id: number
+  name: string
+  adress: string
+  adressMethodType?: "mtn" | "moov" | "celtis"
+  merchantId: number
+  merchant: IMerchant
+}
+
+export interface IPaymentAccount {
+  id: number
+  adressMethodType: string
+  methodTitle:string,
+  methodClassName: string
+  providerMethodType: string
+  isDefault: boolean
+  country: string
+  currency: string
+  methodCode: string
+  balance: number
+  payinFeeType: "VARIABLE" | "UNIQUE" | string
+  payinUniqueFees: number
+  payinVariableFees?: any
+  payoutFeeType: "VARIABLE" | "UNIQUE" | string
+  payoutUniqueFees: number
+  payoutVariableFees?: any
+  payoutFees: number
+  frozenBalance: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface IPayment {
+  id: number
+  askAmount: number
+
+  sentAmount: number
+  adressId: number
+  paymentHash: string
+  merchantId: number
+  networkFees: number
+
+  serviceFees: number
+  status: "PENDING" | "SUCCESS" | "FAILED" | "CREATED"
+
+  comment?: string
+  userId: number
+  paidAt: string
+
+  user: User
+  paymentAccountId: number
+
+  paymentAccount: IPaymentAccount
+  recevingAdress: string
+  merchant: IMerchant
+  createdAt: string
+  updatedAt: string
 }

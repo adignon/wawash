@@ -5,9 +5,11 @@ import { Input, InputLabel } from "@/components/Input";
 import { Text } from "@/components/Themed";
 import { useForm } from "@/hooks/useForm";
 import { useMutation } from "@tanstack/react-query";
+import { router } from "expo-router";
 import { t } from "i18next";
 import Joi from "joi";
 import { Alert, KeyboardAvoidingView, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import Toast from "react-native-toast-message";
 
@@ -15,7 +17,7 @@ export function AddOrder() {
     const { field, isFormValid, form, getValues } = useForm({
         commandId: {
             defaultValue: "",
-            validator: Joi.string().min(6).messages({
+            validator: Joi.string().min(7).regex(/^\#*/).messages({
                 "string.base": "L'ID commande doit être une chaîne de caractères.",
                 "string.empty": "L'ID commande est obligatoire.",
                 "string.min": "L'ID commande doit contenir au moins {#limit} caractères.",
@@ -40,8 +42,17 @@ export function AddOrder() {
         }
         const values = getValues()
         try {
-            const data = await mutation.mutateAsync(values)
-            console.log(data) 
+            const data = await mutation.mutateAsync({
+                orderId:values.commandId,
+                kg:values.kg
+            })
+            router.push({
+                pathname:"/nolayout/merchant/order-details",
+                params:{
+                    orderString:JSON.stringify(data),
+                    id:data.id
+                }
+            })
         } catch (e) {
             if (typeof e == "string") {
                 Toast.show({
@@ -56,6 +67,7 @@ export function AddOrder() {
             }
         }
     }
+    const {bottom}=useSafeAreaInsets()
     return (
         <KeyboardAvoidingView className="bg-white dark:bg-dark-bg flex-1">
             <View className="bg-primary-400/20">
@@ -88,7 +100,7 @@ export function AddOrder() {
                                 <Input
                                     label={<InputLabel className="text-primary" title={t("ID Commande")} />}
                                     keyboardType="numeric"
-                                    className="min-h-[100px]"
+                                    className=""
                                     placeholder={t("EX:#ID34356")}
                                     {...field('commandId')}
                                 />
@@ -97,21 +109,24 @@ export function AddOrder() {
                                 <Input
                                     label={<InputLabel className="text-primary" title={t("Poids du colis")} />}
                                     keyboardType="numeric"
-                                    className="min-h-[100px]"
+                                    className=""
                                     placeholder={t("5")}
                                     right={
-                                        <View className="px-2 py-1 rounded-[5px] bg-white shadow dark:bg-dark-lighter"><Text className="font-jakarta-medium text-[12px] text-dark-300 dark:text-gray-200">{t("kg")}</Text></View>
+                                        <View className="px-2"><View className="px-2 py-1 rounded-[8px] bg-white shadow dark:bg-dark-lighter"><Text className="font-jakarta-medium text-[12px] text-dark-300 dark:text-gray-200">{t("kg")}</Text></View></View>
                                     }
                                     {...field('kg')}
                                 />
                             </View>
                         </View>
                     </View>
-                    <View>
+                    <View style={{
+                        paddingBottom:bottom
+                    }}>
                         <Button.Primary
+                            className="rounded-full"
                             loading={mutation.isPending}
                             onPress={handleSearch}
-                            disabled={isFormValid().isValid}
+                            disabled={!isFormValid().isValid}
 
                             label={<Text className="font-jakarta-semibold text-[18px] text-white dark:text-gray-100 text-center">{t("Rechercher")}</Text>}
                         />

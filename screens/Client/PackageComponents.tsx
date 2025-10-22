@@ -15,12 +15,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import { t } from "i18next";
 import { useColorScheme } from "nativewind";
 import React, { useMemo } from "react";
-import { Pressable, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { PackageDetails } from "./PackageDetail";
 
-export function Packages({ filterPackage, showActive = true, allowSubscriptionCancel = false, onPackageSelect }: { allowSubscriptionCancel?: boolean, filterPackage?: (x: IPackage[]) => IPackage[], showActive?: boolean, onPackageSelect?: () => void }) {
+export function Packages({ filterPackage, showActive = true, allowSubscriptionCancel = false, onPackageSelect, onClose }: { onClose?: () => void, allowSubscriptionCancel?: boolean, filterPackage?: (x: IPackage[]) => IPackage[], showActive?: boolean, onPackageSelect?: () => void }) {
     const { top, bottom } = useSafeAreaInsets()
     const user = useStore(s => s.user)
     const packages = useQuery({
@@ -28,21 +28,22 @@ export function Packages({ filterPackage, showActive = true, allowSubscriptionCa
         queryKey: ['packagess'],
         enabled: showActive
     })
+    console.log(packages.isPending, "data")
     const activeSubscription = useMemo(() => {
-        if(packages.data?.subscription && user?.activeSubscription?.id!=packages.data?.subscription.id){
-            return packages.data?.subscription
-        }else if (user?.activeSubscription?.id && new Date(user.activeSubscription.endAt) > new Date() && user.activeSubscription.isPaid) {
+        if (user?.activeSubscription?.id && new Date(user.activeSubscription.endAt) > new Date() && user.activeSubscription.isPaid) {
             return user?.activeSubscription
-        } 
+        } else if (packages.data?.subscription) {
+            return packages.data?.subscription
+        }
     }, [user, packages.data])
-    const {colorScheme}=useColorScheme()
+
 
     const data = useMemo(() => {
         const data = !!(packages.data?.packages) ? packages.data.packages.sort((a: any, b: any) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" })) : []
         return filterPackage ? filterPackage(data as any) : data
     }, [packages.data])
     const params = useLocalSearchParams()
-
+    const { colorScheme } = useColorScheme()
     if (showActive && activeSubscription) {
         return (
             <PackageDetails activeSubscription={activeSubscription}
@@ -50,11 +51,26 @@ export function Packages({ filterPackage, showActive = true, allowSubscriptionCa
             />
         )
     }
+    console.log(onClose)
     return (
         <View className="flex-1">
 
-            <View className=" bg-primary-500 px-4 pb-14" style={{ paddingTop: top + 20 }}>
-               
+            <View className=" bg-primary-500 px-4 pb-14" style={{ paddingTop: top + (onClose && Platform.OS=="android" ? 0:20) }}>
+                {
+                    onClose && Platform.OS=="android" ? (
+                        <View className="flex-row">
+                            <TouchableOpacity onPress={() => {
+                                onClose()
+                            }} className="rounded-full p-2 bg-primary-dark dark:bg-primary-dark">
+                                <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <Path d="M15 5L5 15" stroke={colorScheme == "light" ? theme.extend.colors.dark[400] : theme.extend.colors.gray[400]} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                    <Path d="M5 5L15 15" stroke={colorScheme == "light" ? theme.extend.colors.dark[400] : theme.extend.colors.gray[400]} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                </Svg>
+                            </TouchableOpacity>
+                        </View>
+                    ):<></>
+                }
+
                 <View className="py-4 gap-y-2">
                     <Text className="text-[25px] font-jakarta-bold text-white dark:text-white">{t("Nos souscriptions")}</Text>
                     <Text className="font-jakarta-medium text-[14px] text-white">{t("Selectionner un plan de souscriptions pour continuer")}</Text>
@@ -100,7 +116,6 @@ export function Packages({ filterPackage, showActive = true, allowSubscriptionCa
         </View>
     )
 }
-
 interface IPackageCard {
     item: IPackage,
     onSelect?: (x: any) => void,

@@ -2,7 +2,7 @@ import { clx } from "@/helpler";
 import { theme } from "@/tailwind.config";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 import { useColorScheme } from "nativewind";
 import React, { useEffect } from "react";
 import { Pressable, View } from "react-native";
@@ -31,12 +31,12 @@ export default function Layout() {
                 <Tabs.Screen name="wallet" options={{
                     animation: "shift",
                     tabBarIcon: (props) => (
-                        <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <Path d="M3.16992 7.43994L11.9999 12.5499L20.7699 7.46991" stroke={props.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            <Path d="M12 21.6099V12.5399" stroke={props.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            <Path d="M9.93012 2.48L4.59013 5.45003C3.38013 6.12003 2.39014 7.80001 2.39014 9.18001V14.83C2.39014 16.21 3.38013 17.89 4.59013 18.56L9.93012 21.53C11.0701 22.16 12.9401 22.16 14.0801 21.53L19.4201 18.56C20.6301 17.89 21.6201 16.21 21.6201 14.83V9.18001C21.6201 7.80001 20.6301 6.12003 19.4201 5.45003L14.0801 2.48C12.9301 1.84 11.0701 1.84 9.93012 2.48Z" stroke={props.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            <Path d="M16.9998 13.24V9.58002L7.50977 4.09998" stroke={props.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <Svg width="24" height="24" viewBox="0 0 24 24" fill="none" >
+                            <Path d="M22 12V17C22 20 20 22 17 22H7C4 22 2 20 2 17V12C2 9.28 3.64 7.38 6.19 7.06C6.45 7.02 6.72 7 7 7H17C17.26 7 17.51 7.00999 17.75 7.04999C20.33 7.34999 22 9.26 22 12Z" stroke={props.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <Path d="M17.7514 7.05C17.5114 7.01 17.2614 7.00001 17.0014 7.00001H7.00141C6.72141 7.00001 6.45141 7.02001 6.19141 7.06001C6.33141 6.78001 6.53141 6.52001 6.77141 6.28001L10.0214 3.02C11.3914 1.66 13.6114 1.66 14.9814 3.02L16.7314 4.79002C17.3714 5.42002 17.7114 6.22 17.7514 7.05Z" stroke={props.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            <Path d="M22 12.5H19C17.9 12.5 17 13.4 17 14.5C17 15.6 17.9 16.5 19 16.5H22" stroke={props.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </Svg>
+
 
                     )
                 }} />
@@ -67,7 +67,7 @@ export default function Layout() {
                     )
                 }} />
             </Tabs>
-            
+
         </BottomSheetModalProvider>
 
     )
@@ -97,8 +97,6 @@ export function CustomTabBar({ state, descriptors, navigation, insets }: BottomT
                 {Object.values(descriptors).map(({ route, options }, index) => {
                     const isFocused = state.index === index;
                     const icon = typeof options.tabBarIcon == "function" ? options.tabBarIcon({ focused: isFocused, color: isFocused ? (colorScheme == "light" ? theme.extend.colors.primary.DEFAULT : "#fff") : theme.extend.colors.gray[100], size: 20 }) : <></>
-
-
                     const onPress = () => {
                         const event = navigation.emit({
                             type: 'tabPress',
@@ -132,8 +130,8 @@ export function CustomTabBar({ state, descriptors, navigation, insets }: BottomT
                 />
             </View>
             <View className="absolute left-1/2 -translate-x-1/2 -translate-y-1/4" style={{ zIndex: 15 }} >
-                <Pressable onPress={()=>{
-                    
+                <Pressable onPress={() => {
+                    router.push("/nolayout/merchant/search-order")
                 }} className=" relative w-[60px] h-[60px] justify-center items-center bg-primary-200 dark:bg-primary-dark-200 rounded-full">
                     <Svg width="30" height="30" viewBox="0 0 30 30" fill="none" >
                         <Path d="M15 7.5L15 22.5" stroke="white" strokeWidth="2" strokeLinecap="round" />

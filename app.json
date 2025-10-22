@@ -1,10 +1,9 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "WaWash",
+    "slug": "wawash",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
     "scheme": "app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,15 +13,26 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": {
+        "dark": "./assets/images/app/ios-dark.png",
+        "light": "./assets/images/app/ios-light.png",
+        "tinted": "./assets/images/app/ios-tinted.png"
+      },
+      "bundleIdentifier": "com.adignon.wawash",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/app/adaptive-icon.png",
+        "monochromeImage": "./assets/images/app/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.adignon.wawash"
     },
     "web": {
       "bundler": "metro",
@@ -31,10 +41,29 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/app/splash-icon-dark.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#00BBDC",
+          "dark": {
+            "image": "./assets/images/app/splash-icon-light.png",
+            "backgroundColor": "#00292D"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9f8dca75-a82f-48dd-a735-c1544f3d3503"
+      }
     }
   }
 }

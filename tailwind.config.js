@@ -33,7 +33,8 @@ module.exports = {
                     bg: "#0D1117",
                     "dark-bg":"#222",
                     border: "#6f757eff",
-                    lighter: "#30363D"
+                    lighter: "#30363D",
+                    "lighter-2": "#414953ff"
                 },
                 primary: {
                     "dark-dark":"#023A43",
@@ -54,6 +55,7 @@ module.exports = {
                 },
                 red: {
                     DEFAULT: "#FF6467",
+                    dark:"#E5575A",
                     500: "#EB5757"
                 },
                 green: {

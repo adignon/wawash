@@ -21,7 +21,7 @@ import { Alert, Modal, ScrollView, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Line, Path } from "react-native-svg";
 import Toast from "react-native-toast-message";
-import { Packages } from "./Packages";
+import { Packages } from "./PackageComponents";
 
 export function PackageDetails({ activeSubscription, subscriptionRefreshProps }: { activeSubscription?: ICommand, subscriptionRefreshProps?: any }) {
     const request: any = useLocalSearchParams()
@@ -30,6 +30,7 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
         queryFn: () => getPackages({ type: request.code }),
         enabled: request.unique == "true"
     })
+   
     const { setUser, user } = useStore(s => s)
     const router = useRouter()
     const params = useMemo(() => {
@@ -482,6 +483,8 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
                         <Packages allowSubscriptionCancel={true} filterPackage={(x) => {
                             return x.filter((y) => y.id != activeSubscription?.package.id)
                         }} showActive={false} onPackageSelect={() => {
+                            setShowPackages(false)
+                        }} onClose={()=>{
                             setShowPackages(false)
                         }} />
                     </View>

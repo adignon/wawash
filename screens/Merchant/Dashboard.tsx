@@ -1,11 +1,14 @@
+import { getStatistics } from '@/api/merchants';
 import { getAdress } from '@/api/subscription';
 import { NotificationButton } from '@/components/Header';
 import { Logo } from '@/components/Logo';
 import { ProfileImage } from '@/components/ProfileImage';
+import { ErrorRetry } from '@/components/State';
 import { Text } from '@/components/Themed';
-import { capitalize } from '@/helpler';
+import { capitalize, clx } from '@/helpler';
 import { useStore } from '@/store/store';
 import { useQuery } from '@tanstack/react-query';
+import Decimal from 'decimal.js';
 import { LinearGradient } from 'expo-linear-gradient';
 import { t } from 'i18next';
 import { useColorScheme } from 'nativewind';
@@ -33,7 +36,14 @@ export function Dashboard() {
             return storedAdress
         }
     }, [query.data, storedAdress])
-
+    const { bottom } = useSafeAreaInsets()
+    const queryStatistics = useQuery({
+        queryKey: ["statiscs"],
+        queryFn: getStatistics
+    })
+    const data = queryStatistics.data
+    const isLoading = queryStatistics.isLoading
+    console.log(query.data)
     return (
         <View className='bg-primary flex-1'>
             <View className="bg-white flex-1 dark:bg-dark-bg" style={{}}>
@@ -89,10 +99,71 @@ export function Dashboard() {
                                     </View>
                                 </View>
                             </View>
+                            <View style={{ borderRadius: 40 }} className='absolute right-5 bottom-5 px-2 py-1  bg-primary/80'>
+                                <Text className='font-jakarta text-dark/60 text-[12px] dark:text-dark/80'>{t("Espace Blanchisseur")}</Text>
+                            </View>
                         </LinearGradient>
                     </View>
-                    <ScrollView className='flex-1'>
-                        
+                    <ScrollView className='flex-1' style={{ paddingBottom: bottom + 100 }}>
+                        <View className='mt-8 px-4'>
+                            <Text className='text-[20px] font-jakarta-bold text-primary dark:text-primary '>{t("Statistiques")}</Text>
+                        </View>
+                        {
+                            (queryStatistics.isLoading || queryStatistics.data) ? (
+                                <>
+                                    <View className='mt-6 px-4 flex-row items-start gap-x-4'>
+                                        <View className='rounded-[20px] flex-1 p-4  bg-white shadow-lg dark:bg-dark-lighter gap-y-2 h-[120px]  justify-between'>
+                                            <Text className='font-jakarta-medium text-dark-400 text-[14px] dark:text-gray-200'>{t("Commandes totales traitées")}</Text>
+
+                                            <View className='flex-row justify-end'>
+                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full")}>
+                                                    {
+                                                        data?.commandTotal ? (
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{data.commandTotal}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("Kg")}</Text></Text>
+                                                        ) : <></>
+                                                    }
+                                                </View>
+                                            </View>
+                                        </View>
+                                        <View className='rounded-[20px]  flex-1  p-4 bg-white shadow-lg dark:bg-dark-lighter  h-[120px] justify-between'>
+                                            <Text className='font-jakarta-medium text-dark-400 text-[14px] dark:text-gray-200'>{t("Kg totaux traitées")}</Text>
+                                            <View className='flex-row justify-end'>
+                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full")}>
+                                                    {
+                                                        data?.commandTotal ? (
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{data.totalKg}</Text>
+                                                        ) : <></>
+                                                    }
+                                                </View>
+                                            </View>
+
+                                        </View>
+                                    </View>
+                                    <View className='px-4 '>
+                                        <View className='mt-4 rounded-[20px]  flex-1  p-4 bg-white shadow-lg dark:bg-dark-lighter  h-[120px] justify-between'>
+                                            <Text className='font-jakarta-medium text-dark-400 text-[14px] dark:text-gray-200'>{t("Revenus total généré")}</Text>
+                                            <View className='flex-row justify-end'>
+                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full")}>
+                                                    {
+                                                        data?.commandTotal ? (
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{Decimal(data.incomes).toNumber()}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("f")}</Text></Text>
+                                                        ) : <></>
+                                                    }
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                </>
+
+                            ) : (
+                                <></>
+                            )
+                        }
+                        {
+                            query.isError ? (
+                                    <ErrorRetry retry={queryStatistics.refetch}/>
+                                ):<></>
+                        }
                     </ScrollView>
                 </View>
             </View>

@@ -1,7 +1,9 @@
 import { getHistories } from "@/api/subscription";
 import { Header } from "@/components/Header";
+import { BasicModal } from "@/components/Modal";
 import { Text } from "@/components/Themed";
 import { capitalize, clx } from "@/helpler";
+import { useStore } from "@/store/store";
 import { IOrder } from "@/store/type";
 import { theme } from "@/tailwind.config";
 import { useQuery } from "@tanstack/react-query";
@@ -10,44 +12,85 @@ import { fr } from "date-fns/locale";
 import { router } from "expo-router";
 import { t } from "i18next";
 import { useColorScheme } from "nativewind";
-import { useMemo } from "react";
-import { RefreshControl, SectionList, TouchableOpacity, View } from "react-native";
+import React, { useMemo } from "react";
+import { RefreshControl, SectionList, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 export function HistoriesPage() {
-    const { top } = useSafeAreaInsets()
+    const query = useQuery({
+        queryKey: ["histories"],
+        queryFn: getHistories
+    })
+    const user = useStore(s => s.user)
+    const options = [
+        {
+            title: t("Commandes planifiées"),
+            label: t("Planifiées"),
+            id: "PLANNED",
+            filter: (data: IOrder[]): IOrder[] => {
+                return data.filter(d => !["CANCELED", "REJECTED"].includes(d.status) && addDays(new Date,7) > new Date(d.executionDate))
+            }
+        },
+        {
+            title: t("Commandes annulées"),
+            label: t("Annulées"),
+            id: "CANCELED",
+            filter: (data: IOrder[]): IOrder[] => {
+                return data.filter(d => d.status == "CANCELED")
+            }
+        },
+        {
+            title: t("Commandes rejetées"),
+            label: t("Annulées"),
+            id: "REJETED",
+            filter: (data: IOrder[]): IOrder[] => {
+                return data.filter(d => d.status == "REJETED")
+            }
+        }
+    ]
+    const [selected, setSelected] = React.useState(options[0].id)
+    const filter = useMemo(() => {
+        return options.find(o => o.id == selected)
+    }, [selected])
+    const orders = useMemo(() => {
+        if (query.data && query.isSuccess) {
+            return filter?.filter(query.data)
+        }
+        return []
+    }, [query.data, filter])
+    console.log(query.data?.map(d=>d.executionDate))
     return (
         <View className="flex-1 bg-light dark:bg-dark-bg">
             <Header
                 backButton=""
                 title={t("Mes commandes")}
+                right={
+                    <FilterOptions options={options} state={[selected, setSelected]} />
+                }
             />
             <View className="mt-8 flex-1">
-                <SectionHistories />
+                <SectionHistories query={query} user={user} orders={orders} />
             </View>
         </View>
     )
 }
 interface ISectionHistories {
-
+    query: any,
+    user: any,
+    orders?: IOrder[]
 }
-function SectionHistories({ }: ISectionHistories) {
-    const query = useQuery({
-        queryKey: ["histories"],
-        queryFn: getHistories
-    })
-    const {bottom}=useSafeAreaInsets()
+export function SectionHistories({ query, user, orders }: ISectionHistories) {
+
+    const { bottom } = useSafeAreaInsets()
     const sections = useMemo(() => {
-        const orders: IOrder[] = query.data as any
         if (!orders?.length) {
             return []
         }
         // Sort table
         const sortedOrders = orders.sort((a, b) => new Date(b.executionDate).getTime() - new Date(a.executionDate).getTime())
-        console.log(sortedOrders.map(d => d.executionDate))
         const sections: any = {}
         sortedOrders.forEach((order) => {
-            const month = format(order.executionDate, "MMMM", {
+            const month = format(order.executionDate, user?.role == "CLEANER" ? "dd MMMM" : "MMMM", {
                 locale: fr
             })
             if (sections[month]) {
@@ -60,19 +103,21 @@ function SectionHistories({ }: ISectionHistories) {
             }
         })
         return Object.values(sections) as any
-    }, [query.data])
+    }, [orders])
+    const {height}=useWindowDimensions()
+    const {top, bottom:bottomArea}=useSafeAreaInsets()
     return (
         <SectionList
             refreshControl={
                 <RefreshControl
-                    refreshing={!!query.data && query.isFetching}
+                    refreshing={!!orders && query.isFetching}
                     onRefresh={query.refetch}
                 />
             }
             className="flex-1"
             sections={sections}
             contentContainerStyle={{
-                paddingBottom:bottom+70
+                paddingBottom: bottom + 70
             }}
             renderSectionHeader={({ section }) => {
                 return (
@@ -81,6 +126,11 @@ function SectionHistories({ }: ISectionHistories) {
                     </View>
                 )
             }}
+            ListEmptyComponent={
+                query.isSuccess && !orders?.length ? (<View style={{height:height-top-bottomArea-100-70}} className="flex-1 items-center justify-center">
+                    <Text className="text-dark-300 font-jakarta text-[14px] text-center dark:text-gray-300">{t("Aucune commande enrégistrée")}</Text>
+                </View>) : <></>
+            }
             renderItem={({ item }) => {
                 return (
                     <View>
@@ -95,11 +145,12 @@ interface IHistoryItem {
     order: IOrder,
     contained?: boolean
 }
-const HistoryItem = ({ order }: IHistoryItem) => {
+export const HistoryItem = ({ order }: IHistoryItem) => {
     const { colorScheme } = useColorScheme()
+    const user = useStore(s => s.user)
     return (
         <TouchableOpacity className="p-4 " onPress={() => router.push({
-            pathname: "/nolayout/client/order",
+            pathname: user?.role == "CLEANER" ? "/nolayout/merchant/order-details" : "/nolayout/client/order",
             params: {
                 id: order.id,
                 orderString: JSON.stringify(order)
@@ -113,7 +164,7 @@ const HistoryItem = ({ order }: IHistoryItem) => {
                         </Svg>
                     </View>
                     <View className="">
-                        <Text className="font-jakarta-semibold text-[16px] text-dark dark:text-gray-100">{format(order.executionDate, "dd MMMM", {
+                        <Text className="font-jakarta-semibold text-[16px] text-dark dark:text-gray-100">{user?.role == "CLEANER" ? `#${order.orderId}` : format(order.executionDate, "dd MMMM", {
                             locale: fr
                         })}</Text>
                         <View className="flex-row items-center gap-x-2">
@@ -128,11 +179,21 @@ const HistoryItem = ({ order }: IHistoryItem) => {
 
                             }
 
-                            <Text className="text-dark-300 font-jakarta-medium dark:text-gray">{`${order.orderType == "SUBSCRIPTION" ? t("Abonnement") : t("Commande")}/kg`}</Text>
+                            <Text className="text-dark-300 font-jakarta-medium dark:text-gray">{
+                                user?.role == "CLEANER" ?
+                                    `${order.pickingHours[0]}`
+                                    :
+                                    `${order.orderType == "SUBSCRIPTION" ? t("Abonnement") : t("Commande")}/kg`
+                            }</Text>
                         </View>
                     </View>
                 </View>
                 <View className="flex-row gap-x-4 items-center">
+                    {
+                        (user?.role) == "CLEANER" && ["SHIPPING_FAST", "SHIPPING_PRIORITIZED"].includes(order.deliveryType) && order.status!="DELIVERED" ? (
+                            <PrioritShipping contained={false} title={"Urgent~" + order.executionDuration + "h"} />
+                        ) : <></>
+                    }
                     <StatusItem order={order} />
                     <Svg width="7" height="12" viewBox="0 0 7 12" fill="none" >
                         <Path d="M1 10.9L5.88998 6.82501C6.46748 6.34376 6.46748 5.55626 5.88998 5.07501L1 1" stroke={colorScheme == "light" ? theme.extend.colors.dark[300] : theme.extend.colors.dark[300]} strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
@@ -144,9 +205,37 @@ const HistoryItem = ({ order }: IHistoryItem) => {
     )
 }
 
+
+export const PrioritShipping = ({ contained, title }: { contained: boolean, title: string }) => {
+    const { colorScheme } = useColorScheme()
+    return (
+        <View className={clx("flex-row items-center gap-x-2 px-1.5 py-1 rounded-[5px] ", !contained ? "bg-red/10 dark:bg-red-500/10" : "bg-red dark:bg-red-dark")}>
+            <View>
+
+                <Svg width="14" height="14" viewBox="0 0 31 30" fill="none" >
+                    <Path d="M15.3332 17.5H16.5832C17.9582 17.5 19.0832 16.375 19.0832 15V2.5H7.83319C5.95819 2.5 4.3207 3.53748 3.4707 5.06248" stroke={contained ? (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]) : colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path d="M2.83325 21.25C2.83325 23.325 4.50825 25 6.58325 25H7.83325C7.83325 23.625 8.95825 22.5 10.3333 22.5C11.7083 22.5 12.8333 23.625 12.8333 25H17.8333C17.8333 23.625 18.9583 22.5 20.3333 22.5C21.7083 22.5 22.8333 23.625 22.8333 25H24.0833C26.1583 25 27.8333 23.325 27.8333 21.25V17.5H24.0833C23.3958 17.5 22.8333 16.9375 22.8333 16.25V12.5C22.8333 11.8125 23.3958 11.25 24.0833 11.25H25.6957L23.5583 7.51251C23.1083 6.73751 22.2833 6.25 21.3833 6.25H19.0833V15C19.0833 16.375 17.9583 17.5 16.5833 17.5H15.3333" stroke={contained ? (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]) : colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path d="M10.3333 27.5C11.714 27.5 12.8333 26.3807 12.8333 25C12.8333 23.6193 11.714 22.5 10.3333 22.5C8.95254 22.5 7.83325 23.6193 7.83325 25C7.83325 26.3807 8.95254 27.5 10.3333 27.5Z" stroke={contained ? (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]) : colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path d="M20.3333 27.5C21.714 27.5 22.8333 26.3807 22.8333 25C22.8333 23.6193 21.714 22.5 20.3333 22.5C18.9525 22.5 17.8333 23.6193 17.8333 25C17.8333 26.3807 18.9525 27.5 20.3333 27.5Z" stroke={contained ? (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]) : colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path d="M27.8333 15V17.5H24.0833C23.3958 17.5 22.8333 16.9375 22.8333 16.25V12.5C22.8333 11.8125 23.3958 11.25 24.0833 11.25H25.6957L27.8333 15Z" stroke={contained ? (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]) : colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path d="M2.83325 10H10.3333" stroke={contained ? (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]) : colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path d="M2.83325 13.75H7.83325" stroke={contained ? (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]) : colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path d="M2.83325 17.5H5.33325" stroke={contained ? (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]) : colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+
+            </View>
+            <View>
+                <Text className={clx("text-[12px] font-jakarta-medium ", !contained ? "text-red dark:text-red-500" : "text-white dark:text-gray-200")}>{t(title)}</Text>
+            </View>
+        </View>
+
+    )
+}
+
+
 export function StatusItem({ order, contained = false }: IHistoryItem) {
     const { colorScheme } = useColorScheme()
-    if (["CREATED", "PICKED", "WASHING"].includes(order.status)) {
+    if (["CREATED", "PICKED", "WASHING", "READY"].includes(order.status)) {
         let title = t("Prochainement")
         if (order.status == "CREATED" && !order.hasStarted) {
             const date = new Date(order.executionDate)
@@ -167,6 +256,8 @@ export function StatusItem({ order, contained = false }: IHistoryItem) {
             title = t("Récup. en cours")
         } else if (order.status == "PICKED" || order.status == "WASHING") {
             title = t("Lavage en cours")
+        } else if (order.status == "READY") {
+            title = t("Livraison")
         }
         return (
             <View className={clx("flex-row items-center gap-x-2 px-1.5 py-1 rounded-[5px] ", !contained ? "bg-yellow-500/10 dark:bg-yellow-500/20" : "bg-yellow-500 dark:bg-yellow-dark-500")}>
@@ -174,7 +265,6 @@ export function StatusItem({ order, contained = false }: IHistoryItem) {
                     <Svg width="8" height="12" viewBox="0 0 8 12" fill="none" >
                         <Path d="M5.62002 1H2.38002C0.500019 1 0.355019 2.69 1.37002 3.61L6.63002 8.39C7.64502 9.31 7.50002 11 5.62002 11H2.38002C0.500019 11 0.355019 9.31 1.37002 8.39L6.63002 3.61C7.64502 2.69 7.50002 1 5.62002 1Z" stroke={!contained ? (colorScheme === "light" ? theme.extend.colors.yellow[500] : theme.extend.colors.yellow[500]) : (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[200])} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                     </Svg>
-
                 </View>
                 <View>
                     <Text className={clx("text-[12px] font-jakarta-medium ", !contained ? "text-yellow-500 dark:text-yellow-500" : "text-white dark:text-dark-400")}>{title}</Text>
@@ -189,11 +279,9 @@ export function StatusItem({ order, contained = false }: IHistoryItem) {
                     <Svg width="8" height="7" viewBox="0 0 8 7" fill="none" >
                         <Path d="M7 1.5L4.65205 4.31754C3.99647 5.10423 3.66869 5.49758 3.22812 5.51756C2.78755 5.53755 2.42549 5.17549 1.70139 4.45139L1 3.75" stroke={!contained ? (colorScheme == "light" ? theme.extend.colors.green[500] : theme.extend.colors.green[500]) : (colorScheme == "light" ? "#fff" : theme.extend.colors.gray[200])} strokeWidth="1.5" strokeLinecap="round" />
                     </Svg>
-
-
                 </View>
                 <View>
-                    <Text className={clx("text-[12px] font-jakarta-medium ", !contained ? "text-green-500 dark:text-green-500" : "text-white dark:text-gray-200")}>{t("Traité")}</Text>
+                    <Text className={clx("text-[12px] font-jakarta-medium ", !contained ? "text-green-500 dark:text-green-500" : "text-white dark:text-gray-200")}>{t("Linge livré")}</Text>
                 </View>
             </View>
         )
@@ -205,8 +293,67 @@ export function StatusItem({ order, contained = false }: IHistoryItem) {
                 </View>
             </View>
         )
+    } else if (order.status == "NOTEXECUTED") {
+        return (
+            <View className={clx("flex-row items-center gap-x-2 px-1.5 py-1 rounded-[5px] ", !contained ? "bg-red/10 dark:bg-red-500/10" : "bg-red dark:bg-red-500")}>
+                <View>
+                    <Svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <Path d="M10.5 3.5L3.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} stroke-linecap="round" stroke-linejoin="round" />
+                        <Path d="M3.5 3.5L10.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} stroke-linecap="round" stroke-linejoin="round" />
+                    </Svg>
+
+                </View>
+                <View>
+                    <Text className={clx("text-[12px] font-jakarta-medium ", !contained ? "text-red dark:text-red-500" : "text-white dark:text-gray-200")}>{t("Non traité")}</Text>
+                </View>
+            </View>
+        )
     }
     return (
         <View></View>
+    )
+}
+
+export const FilterOptions = ({ state, options }: {
+    options: {
+        title: string;
+        label: string;
+        id: string;
+    }[],
+    state: [string, React.Dispatch<React.SetStateAction<string>>]
+}) => {
+    const [selected, setSelected] = state
+    const [open, setOpen] = React.useState(false)
+    const { colorScheme } = useColorScheme()
+    const option = useMemo(() => {
+        return options.find(o => o.id == selected)
+    }, [selected])
+    return (
+        <>
+            <TouchableOpacity onPress={() => setOpen(true)} className="bg-white flex-row items-center dark:bg-dark-lighter px-4 rounded-full px-4 gap-x-2 py-2">
+                <Text className="font-jakarta text-[12px] text-primary dark:text-gray-200 ">{option?.label}</Text>
+                <Svg width="12" height="7" viewBox="0 0 12 7" fill="none" >
+                    <Path d="M1.09999 1L5.17499 5.88998C5.65624 6.46748 6.44374 6.46748 6.92499 5.88998L11 1" stroke={colorScheme == "light" ? theme.extend.colors.dark[300] : theme.extend.colors.gray[200]} strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+            </TouchableOpacity>
+            <BasicModal show={open} onClose={() => setOpen(false)}>
+                <View className="mt-4 gap-y-2">
+                    {
+                        options.map(o => (
+                            <TouchableOpacity onPress={() => setSelected(o.id)} key={o.id} className="py-2 px-2 flex-row items-center gap-x-3">
+                                <View className={clx("transition w-5 h-5 rounded-full justify-center items-center", o.id == selected ? "opacity-1" : "opacity-0")}>
+                                    <Svg width="15" height="14" viewBox="0 0 8 7" fill="none" >
+                                        <Path d="M7 1.5L4.65205 4.31754C3.99647 5.10423 3.66869 5.49758 3.22812 5.51756C2.78755 5.53755 2.42549 5.17549 1.70139 4.45139L1 3.75" stroke={colorScheme == "light" ? theme.extend.colors.primary.DEFAULT : theme.extend.colors.primary[500]} strokeWidth="1" strokeLinecap="round" />
+                                    </Svg>
+                                </View>
+                                <View>
+                                    <Text className={clx("font-jakarta-medium text-[15px] ", o.id == selected ? "text-primary dark:text-primary" : "text-dark-400 dark:text-gray-100")}>{o.title}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        ))
+                    }
+                </View>
+            </BasicModal>
+        </>
     )
 }
