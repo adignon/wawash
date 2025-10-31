@@ -141,7 +141,7 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
 
             ),
             title: t("Aucun frais caché"),
-            description: "Un prix fixe sans frais cachés pour une tranquillité d'esprit."
+            description: "Un prix fixe incluant tous les couts (lessive, livraison, etc...) sans frais cachés pour une tranquillité d'esprit."
         }
     ]
 

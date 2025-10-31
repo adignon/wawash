@@ -63,6 +63,10 @@ function RootLayoutNav() {
       router.replace('/auth/otp-verification')
     }
 
+    if(colorScheme=="light"){
+      setColorScheme("dark")
+    }
+
     SplashScreen.hideAsync();
   }, [])
 

@@ -93,7 +93,9 @@ export function Packages({ filterPackage, showActive = true, allowSubscriptionCa
                 }
                 {
                     packages.isError && (
-                        <ErrorRetry retry={packages.refetch} />
+                        <View className="flex-1">
+                            <ErrorRetry retry={packages.refetch} />
+                        </View>
                     )
                 }
             </View>

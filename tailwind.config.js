@@ -51,7 +51,9 @@ module.exports = {
                     400:"#5DC6D8",
                     DEFAULT: "#06ADC9",
                     500: "#04788C",
-                    "dark-500":"#035C66"
+                    "dark-500":"#035C66",
+                    "splash":"#00292D",
+                    "splash-dark":"#00292D"
                 },
                 red: {
                     DEFAULT: "#FF6467",

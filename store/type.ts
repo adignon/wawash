@@ -149,7 +149,7 @@ export interface IPaymentAdress {
 export interface IPaymentAccount {
   id: number
   adressMethodType: string
-  methodTitle:string,
+  methodTitle: string,
   methodClassName: string
   providerMethodType: string
   isDefault: boolean
@@ -192,6 +192,18 @@ export interface IPayment {
   paymentAccount: IPaymentAccount
   recevingAdress: string
   merchant: IMerchant
+  createdAt: string
+  updatedAt: string
+}
+
+export interface INotification {
+  id: number
+  title: string
+  description: string
+  userId: number
+  readAt: string
+  href: string
+  user: User
   createdAt: string
   updatedAt: string
 }

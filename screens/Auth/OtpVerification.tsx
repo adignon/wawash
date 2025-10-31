@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { useColorScheme } from "nativewind";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, KeyboardAvoidingView, Platform, View } from "react-native";
@@ -15,7 +16,7 @@ import Toast from "react-native-toast-message";
 
 export function OtpVerification() {
     const { t } = useTranslation()
-
+    const {colorScheme}=useColorScheme()
     const [phone, setPhone] = React.useState("")
     const mutation = useMutation({
         mutationFn: otpVerify,
