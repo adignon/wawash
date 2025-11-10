@@ -108,7 +108,7 @@ export interface IInvoice {
   invoiceType: "SUBSCRIPTION_LAUNDRY" | "COMMAND_LAUNDRY" | "SUBSCRIPTION_OVERWEIGHT";
   amount: string;
   paymentHash: string;
-  status: "CREATED" | "PENDING" | "SUCCESS" | "FAILED";
+  status: "CREATED" | "PENDING" | "SUCCESS" | "FAILED" | "CANCELED";
   userId: number;
   user: IUser;
   createdAt: string;

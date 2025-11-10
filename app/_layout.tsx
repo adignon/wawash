@@ -37,7 +37,7 @@ export default function RootLayout() {
     JakartaSemiBold: require('../assets/fonts/Jakarta/PlusJakartaSans-SemiBold.ttf'),
     Jakarta: require('../assets/fonts/Jakarta/PlusJakartaSans-Regular.ttf'),
   });
-  const hasHydrated = useStore.persist.hasHydrated() || useStore.getState().user;
+  const hasHydrated = useStore.persist.hasHydrated()
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -63,9 +63,6 @@ function RootLayoutNav() {
       router.replace('/auth/otp-verification')
     }
 
-    if(colorScheme=="light"){
-      setColorScheme("dark")
-    }
 
     SplashScreen.hideAsync();
   }, [])

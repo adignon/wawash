@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "WaWash",
-    "slug": "wawash",
+    "name": "Waklin",
+    "slug": "waklin",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "app",
@@ -19,7 +19,7 @@
         "light": "./assets/images/app/ios-light.png",
         "tinted": "./assets/images/app/ios-tinted.png"
       },
-      "bundleIdentifier": "com.adignon.wawash",
+      "bundleIdentifier": "com.adignon.waklin",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -32,7 +32,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.adignon.wawash"
+      "package": "com.adignon.waklin"
     },
     "web": {
       "bundler": "metro",
@@ -63,7 +63,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "9f8dca75-a82f-48dd-a735-c1544f3d3503"
+        "projectId": "d5f90879-40e0-49b1-85d6-a18d950b6e7f"
       }
     }
   }

@@ -148,7 +148,10 @@ export function WarningAlert({ title, description }: IWarningAlert) {
                         <Text className="text-[14px] font-jakarta-semibold text-primary-500 dark:text-primary-100">{title}</Text>
                     )
                 }
-                <Text className="text-[12px] font-jakarta text-primary-500 dark:text-primary-100">{description}</Text>
+                {
+                    description&&<Text className="text-[12px] font-jakarta text-primary-500 dark:text-primary-100">{description}</Text>
+                }
+                
             </View>
         </View>
     )

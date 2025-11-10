@@ -24,7 +24,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import Svg, { Path } from "react-native-svg";
 import Toast from "react-native-toast-message";
 
-const days = [{ id: 1, name: t("Lundi") }, { id: 2, name: t("Mardi") }, { id: 3, name: t("Mercredi") }, { id: 4, name: t("Jeudi") }, { id: 5, name: t("Vendredi") }, { id: 6, name: t("Samedi") }, { id: 7, name: t("Dimance") }]
+const days = [{ id: 1, name: t("Lundi") }, { id: 2, name: t("Mardi") }, { id: 3, name: t("Mercredi") }, { id: 4, name: t("Jeudi") }, { id: 5, name: t("Vendredi") }, { id: 6, name: t("Samedi") }, { id: 7, name: t("Dimanche") }]
 const hours = [{ value: ["07:00", "09:00"], name: t("Matinal") }, { value: ["12:00", "15:00"], name: t("Apres-midi") }, { value: ["17:00", "19:00"], name: t("Soirée") }]
 const handleFormat = (value: string[] | null | undefined) => {
     return value ? value[0] + value[1] : null

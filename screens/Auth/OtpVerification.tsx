@@ -41,7 +41,7 @@ export function OtpVerification() {
                 changeDevice: changeDevice.current
             })
             Toast.show({
-                text1: data.message,
+                text1: data.message ??"Code enovoyé",
                 type: "success"
             })
             router.push({
@@ -101,7 +101,7 @@ export function OtpVerification() {
                     />
                 </View>
                 <View className="h-[350px] p-4 justify-end">
-                    <View>
+                    <View>  
                         <Text className="text-center font-jakarta-bold text-[20px] text-dark-text dark:text-white">{t("Entrez  votre numéro de téléphone")}</Text>
                         <Text className="mt-2 text-center text-[16px] font-jakarta-medium text-dark-400  ">{t("Nous vous enverrons un code via whatsapp pour vérifier votre numéro.")}</Text>
                     </View>

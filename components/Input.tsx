@@ -273,7 +273,7 @@ interface ICheckbox {
 }
 export function Checkbox({ label,disabled, check, onCheck }: ICheckbox) {
     return (
-        <TouchableOpacity disabled={disabled} onPress={() => onCheck(!check)} className={clx("flex-row", disabled&&"opacity-20")}>
+        <TouchableOpacity disabled={disabled} onPress={() => onCheck(!check)} className={clx("flex-row items-center", disabled&&"opacity-20")}>
             <View className={clx("justify-center items-center w-[18px] h-[18px] rounded-[5px] ", check ? "bg-primary dark:bg-primary-500" : "border border-gray dark:border-dark-border")}>
                 {
                     check && (

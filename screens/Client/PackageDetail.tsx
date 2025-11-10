@@ -42,6 +42,7 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
             return request
         }
     }, [request, activeSubscription])
+    console.log(query.data)
     const { top, bottom } = useSafeAreaInsets()
     const { colorScheme } = useColorScheme()
     const prices = useMemo(() => {

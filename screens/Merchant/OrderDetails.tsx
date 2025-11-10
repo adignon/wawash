@@ -80,7 +80,7 @@ export function OrderDetails() {
                                 t: order.executionDuration
                             }
                         ),
-                        description1: t("+{{amount}}Kg", {
+                        description1: t("+{{amount}}f/Kg", {
                             amount: order.addons.SHIPPING.unitCost
                         })
                     })
@@ -91,7 +91,7 @@ export function OrderDetails() {
                                 t: order.executionDuration
                             }
                         ),
-                        description1: t("+{{amount}}Kg", {
+                        description1: t("+{{amount}}f/Kg", {
                             amount: order.addons.REPASSAGE.unitCost
                         })
                     })
@@ -115,7 +115,8 @@ export function OrderDetails() {
 
             try {
                 const data = await confirmMutation.mutateAsync({
-                    orderId: order!.id!
+                    orderId: order!.orderId!,
+                    kg:order!.userKg!,
                 })
                 await orderQuery.refetch()
                 Toast.show({

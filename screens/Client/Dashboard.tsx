@@ -4,6 +4,7 @@ import { Logo } from '@/components/Logo';
 import { ProfileImage } from '@/components/ProfileImage';
 import { Text } from '@/components/Themed';
 import { capitalize, clx } from '@/helpler';
+import { country } from '@/storage/config';
 import { useStore } from '@/store/store';
 import { IAddress } from '@/store/type';
 import { theme } from '@/tailwind.config';
@@ -17,23 +18,26 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from 'react-native-svg';
-
+const fomatAdressForLocalStorage = (data:any) => ({
+    ...data,
+    department: data.departement,
+    location: data.coord,
+    addLocation: Boolean(data.coord ?? null),
+    contactPhone:data.contactPhone.replace(country.prefix,'')
+})
 export function Dashboard() {
     const { top } = useSafeAreaInsets()
     const { colorScheme } = useColorScheme()
     const user = useStore(s => s.user)
     const storedAdress = useStore(s => s.address)
+    console.log(storedAdress)
     const query = useQuery({
         queryKey: ["adress"],
         queryFn: getAdress
     })
     const adress = useMemo(() => {
         if (query.data) {
-            return {
-                ...query.data,
-                location: query.data.coord,
-                addLocation: Boolean(query.data.coord ?? null)
-            }
+            return fomatAdressForLocalStorage(query.data)
         } else {
             return storedAdress
         }
@@ -240,7 +244,7 @@ const EmplacementConfiguration = ({ adress }: { adress: IAddress }) => {
     const setAdress = useStore(s => s.setAddress)
     return (
         <TouchableOpacity onPress={() => {
-            setAdress(adress)
+            setAdress(fomatAdressForLocalStorage(adress))
             router.push("/modal/configure-adress")
         }} className='flex-row items-center bg-primary-dark dark:bg-primary-dark-dark rounded-[20px] p-4 px-5 gap-x-4'>
             <View className='w-[40px] h-[40px] bg-primary dark:bg-primary-base-dark rounded-full justify-center items-center'>
@@ -252,7 +256,7 @@ const EmplacementConfiguration = ({ adress }: { adress: IAddress }) => {
             </View>
             <View className='gap-y-1 flex-1'>
                 <Text className='font-jakarta-semibold text-[16px] text-white'>{adress ? t("Votre emplacement actuel") : t("Configurer votre emplacement ")}</Text>
-                <Text className='text-[14px] text-white font-jakarta' numberOfLines={1} ellipsizeMode="tail" >{adress ? `${capitalize(adress.quartier)}, ${capitalize(adress.arrondissement)}, ${capitalize(adress.commune)}, ${capitalize(adress.department)}` : t("Enrégistrez le lieu de récupération de vos linges")}</Text>
+                <Text className='text-[14px] text-white font-jakarta' numberOfLines={1} ellipsizeMode="tail" >{adress ? `${capitalize(adress.quartier)}, ${capitalize(adress.arrondissement)}, ${capitalize(adress.commune)}, ${capitalize(adress.departement)}` : t("Enrégistrez le lieu de récupération de vos linges")}</Text>
             </View>
             <View>
                 <Svg width="12" height="7" viewBox="0 0 12 7" fill="none">

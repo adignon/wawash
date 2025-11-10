@@ -4,6 +4,7 @@ import { Text } from "@/components/Themed";
 import { clx } from "@/helpler";
 import { theme } from "@/tailwind.config";
 import { Image } from "expo-image";
+import { router } from "expo-router";
 import { t } from "i18next";
 import { useColorScheme } from "nativewind";
 import { ScrollView, View } from "react-native";
@@ -164,7 +165,7 @@ export function How() {
                         )
                     }
                     <View className="mx-4 mt-6">
-                        <Button.Primary className="bg-primary-dark" label={t("Commander maintenant")} />
+                        <Button.Primary onPress={()=>router.push("/client/packages")} className="bg-primary-dark" label={t("Commander maintenant")} />
                     </View>
                 </View>
 

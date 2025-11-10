@@ -117,10 +117,9 @@ export function useForm(params: IFormParam) {
                     isValid: !Boolean(error)
                 }
                 isValid = isValid && !Boolean(error)
-                // if(!isValid){
-                //     lastError=error
-                //     break;
-                // }
+                if(!isValid){
+                    lastError=error
+                }
 
             }
         }

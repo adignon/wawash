@@ -230,11 +230,11 @@ export function Order() {
                                 </View>
                             </View>
                             {
-                                order.status == "READY" && order.invoice?.status != "SUCCESS" && (
+                                order.status == "READY" && (
                                     <View className="px-4">
                                         <WarningAlert
                                             title={t("Livraison démarrée")}
-                                            description={t("Vous serez livré bientot. Veuillez régler votre facture en attente pour récupérer vos linges")}
+                                            description={ order.invoice && order.invoice?.status != "SUCCESS" ? t("Vous serez livré bientot. Veuillez régler votre facture en attente pour récupérer vos linges"):""}
                                         />
                                     </View>
                                 )
@@ -601,7 +601,6 @@ function DetailModal({ order, type = "description", show, onClose, refetchOrder 
 export function StatusInvoice({ invoice, contained, icon }: { icon?: boolean, invoice?: IInvoice, contained?: boolean }) {
     const { colorScheme } = useColorScheme()
     if (invoice?.status == "SUCCESS") {
-
         return (
             <View className={clx("flex-row items-center gap-x-2 px-1.5 py-1 rounded-[5px] ", !contained ? "bg-green-500/10 dark:bg-green-500/10" : "bg-green-500 dark:bg-green-dark-500")}>
                 <View>
@@ -614,13 +613,28 @@ export function StatusInvoice({ invoice, contained, icon }: { icon?: boolean, in
                 </View>
             </View>
         )
-    } else {
+    } else if (invoice?.status == "CANCELED") {
+        return (
+            <View className={clx("flex-row items-center gap-x-2 px-1.5 py-1 rounded-[5px] ", !contained ? "bg-gray/10 dark:bg-dark-lighter" : "bg-gray dark:bg-dark-lighter")}>
+                <View>
+                    <Svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <Path d="M10.5 3.5L3.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.dark.DEFAULT : theme.extend.colors.gray[200]} strokeLinecap="round" strokeLinejoin="round" />
+                        <Path d="M3.5 3.5L10.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.dark.DEFAULT : theme.extend.colors.gray[200]} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+
+                </View>
+                <View>
+                    <Text className={clx("text-[12px] font-jakarta-medium ", !contained ? "text-dark dark:text-gray-200" : "text-dark dark:text-gray-200")}>{t("Non Payé")}</Text>
+                </View>
+            </View>
+        )
+    }else {
         return (
             <View className={clx("flex-row items-center gap-x-2 px-1.5 py-1 rounded-[5px] ", !contained ? "bg-red/10 dark:bg-red-500/10" : "bg-red dark:bg-red-500")}>
                 <View>
                     <Svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                        <Path d="M10.5 3.5L3.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} stroke-linecap="round" stroke-linejoin="round" />
-                        <Path d="M3.5 3.5L10.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} stroke-linecap="round" stroke-linejoin="round" />
+                        <Path d="M10.5 3.5L3.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeLinecap="round" strokeLinejoin="round" />
+                        <Path d="M3.5 3.5L10.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeLinecap="round" strokeLinejoin="round" />
                     </Svg>
 
                 </View>

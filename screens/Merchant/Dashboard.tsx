@@ -43,7 +43,7 @@ export function Dashboard() {
     })
     const data = queryStatistics.data
     const isLoading = queryStatistics.isLoading
-    console.log(query.data)
+    console.log(data)
     return (
         <View className='bg-primary flex-1'>
             <View className="bg-white flex-1 dark:bg-dark-bg" style={{}}>
@@ -115,11 +115,11 @@ export function Dashboard() {
                                         <View className='rounded-[20px] flex-1 p-4  bg-white shadow-lg dark:bg-dark-lighter gap-y-2 h-[120px]  justify-between'>
                                             <Text className='font-jakarta-medium text-dark-400 text-[14px] dark:text-gray-200'>{t("Commandes totales traitées")}</Text>
 
-                                            <View className='flex-row justify-end'>
-                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full")}>
+                                            <View className='flex-row justify-end '>
+                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full ", 'flex-row flex-1 justify-end')}>
                                                     {
-                                                        data?.commandTotal ? (
-                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{data.commandTotal}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("Kg")}</Text></Text>
+                                                        !isNaN(data?.commandTotal!) ? (
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right flex-1 '>{data?.commandTotal??0}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("Kg")}</Text></Text>
                                                         ) : <></>
                                                     }
                                                 </View>
@@ -128,10 +128,10 @@ export function Dashboard() {
                                         <View className='rounded-[20px]  flex-1  p-4 bg-white shadow-lg dark:bg-dark-lighter  h-[120px] justify-between'>
                                             <Text className='font-jakarta-medium text-dark-400 text-[14px] dark:text-gray-200'>{t("Kg totaux traitées")}</Text>
                                             <View className='flex-row justify-end'>
-                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full")}>
+                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full",  'flex-row flex-1 justify-end')}>
                                                     {
-                                                        data?.commandTotal ? (
-                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{data.totalKg}</Text>
+                                                        !isNaN(data?.totalKg!) ? (
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{data?.totalKg??0}</Text>
                                                         ) : <></>
                                                     }
                                                 </View>
@@ -143,10 +143,10 @@ export function Dashboard() {
                                         <View className='mt-4 rounded-[20px]  flex-1  p-4 bg-white shadow-lg dark:bg-dark-lighter  h-[120px] justify-between'>
                                             <Text className='font-jakarta-medium text-dark-400 text-[14px] dark:text-gray-200'>{t("Revenus total généré")}</Text>
                                             <View className='flex-row justify-end'>
-                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full")}>
+                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full",  'flex-row flex-1 justify-end')}>
                                                     {
-                                                        data?.commandTotal ? (
-                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{Decimal(data.incomes).toNumber()}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("f")}</Text></Text>
+                                                        !isNaN(data?.incomes!) ? (
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{Decimal(data?.incomes??0).toNumber()}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("f")}</Text></Text>
                                                         ) : <></>
                                                     }
                                                 </View>

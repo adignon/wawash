@@ -28,7 +28,7 @@ export function HistoriesPage() {
             label: t("Planifiées"),
             id: "PLANNED",
             filter: (data: IOrder[]): IOrder[] => {
-                return data.filter(d => !["CANCELED", "REJECTED"].includes(d.status) && addDays(new Date,7) > new Date(d.executionDate))
+                return data.filter(d => !["CANCELED", "REJECTED"].includes(d.status) /*&& addDays(new Date,7) > new Date(d.executionDate)*/)
             }
         },
         {
@@ -58,7 +58,6 @@ export function HistoriesPage() {
         }
         return []
     }, [query.data, filter])
-    console.log(query.data?.map(d=>d.executionDate))
     return (
         <View className="flex-1 bg-light dark:bg-dark-bg">
             <Header
@@ -183,7 +182,9 @@ export const HistoryItem = ({ order }: IHistoryItem) => {
                                 user?.role == "CLEANER" ?
                                     `${order.pickingHours[0]}`
                                     :
-                                    `${order.orderType == "SUBSCRIPTION" ? t("Abonnement") : t("Commande")}/kg`
+                                    `${order.orderType == "SUBSCRIPTION" ? t("Abonnement",{
+                                        
+                                    }) : t("Commande")}/kg`
                             }</Text>
                         </View>
                     </View>
@@ -247,9 +248,10 @@ export function StatusItem({ order, contained = false }: IHistoryItem) {
             } else if (isSameDay(date, afterTomorrow)) {
                 title = t("Après-demain")
             } else {
-                title = capitalize(format(order.executionDate, "dd EEEE", {
-                    locale: fr
-                }))
+                title=t("Bientôt")
+                // title = capitalize(format(order.executionDate, "dd EEEE", {
+                //     locale: fr
+                // }))
             }
 
         } else if (order.status == "CREATED") {

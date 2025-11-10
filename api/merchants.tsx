@@ -8,7 +8,7 @@ interface IOrderEval {
 }
 export async function orderEval(data: IOrderEval) {
     try {
-        const { data: result } = await axios.post("/merchants/order/eval", data)
+        const { data: result } = await axios.post("/merchants/order/accept?preview=1", data)
         return result
     } catch (e) {
         throw handleAxiosResponseEror(e)

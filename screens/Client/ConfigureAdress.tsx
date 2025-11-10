@@ -20,8 +20,9 @@ import Svg, { Path } from "react-native-svg";
 import Toast from "react-native-toast-message";
 
 export function ConfigureAdress() {
-    const { setAddress, address } = useStore((s) => (s))
-    const { isFormValid, getValues, field, form } = useForm({
+    const setAddress = useStore((s) => s.setAddress)
+    const address = useStore(s => s.address)
+    const formData = {
         quartier: {
             defaultValue: (address?.quartier) ?? '',
             validator: Joi.string().min(3).messages({
@@ -56,7 +57,7 @@ export function ConfigureAdress() {
         },
         description: {
             defaultValue: (address?.description) ?? '',
-            validator: (value) => {
+            validator: (value:any) => {
                 return value ? Joi.string().messages({
                     "string.base": "La description doit être une chaîne de caractères.",
                 }).validate(value).error?.message : null
@@ -75,10 +76,12 @@ export function ConfigureAdress() {
             validator: Joi.string().regex(/^01[0-9]{8}/).messages({
                 "string.base": "Le numéro de téléphone doit être une chaîne de caractères.",
                 "string.empty": "Le numéro de téléphone est obligatoire.",
-                "string.pattern.base": "Le numéro de téléphone doit commencer par +22901 et contenir exactement 8 chiffres supplémentaires.",
+                "string.pattern.base": "Le numéro de téléphone doit commencer par 01 et contenir exactement 8 chiffres supplémentaires.",
             }),
         }
-    })
+    }
+    const { isFormValid, getValues, field, form, setForm } = useForm(formData)
+
     const mutation = useMutation({
         mutationFn: saveAdress,
         mutationKey: ["saveAdress"]
@@ -205,11 +208,13 @@ export function ConfigureAdress() {
             description: values.description,
             coord: location
         }
+        
         try {
-            const data = await mutation.mutateAsync({
+             await mutation.mutateAsync({
                 ...requestData,
                 contactPhone: country.prefix + values.contactPhone
             })
+
             setAddress({
                 ...requestData,
                 addLocation
@@ -309,7 +314,7 @@ export function ConfigureAdress() {
                                             label={<InputLabel className="text-primary" title={t("Description Supplémentaire")} />}
                                             multiline={true}
                                             numberOfLines={5}
-                                            className="min-h-[100px]"
+                                            className="min-h-[100px] align-top"
                                             placeholder={t("Décrivez vous plus précisément votre  zone d'habitation pour mieux orienter nos collecteurs de linge")}
                                             {...field('description')}
                                         />
