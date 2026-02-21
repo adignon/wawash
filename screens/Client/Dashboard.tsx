@@ -14,23 +14,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Href, router } from 'expo-router';
 import { t } from 'i18next';
 import { useColorScheme } from 'nativewind';
-import { useMemo } from 'react';
-import { Pressable, ScrollView, TouchableOpacity, View } from "react-native";
+import React, { useMemo } from 'react';
+import { Pressable, ScrollView, TouchableOpacity, View, useColorScheme as useNativeColorScheme } from "react-native";
+import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from 'react-native-svg';
-const fomatAdressForLocalStorage = (data:any) => ({
+const fomatAdressForLocalStorage = (data: any) => ({
     ...data,
     department: data.departement,
-    location: data.coord,
-    addLocation: Boolean(data.coord ?? null),
-    contactPhone:data.contactPhone.replace(country.prefix,'')
+    departement: data.departement,
+    location: data.coord || data.coordinates,
+    addLocation: Boolean(data.coord || data.coordinates),
+    contactPhone: data.contactPhone.replace(country.prefix, '')
 })
 export function Dashboard() {
     const { top } = useSafeAreaInsets()
     const { colorScheme } = useColorScheme()
     const user = useStore(s => s.user)
     const storedAdress = useStore(s => s.address)
-    console.log(storedAdress)
     const query = useQuery({
         queryKey: ["adress"],
         queryFn: getAdress
@@ -152,7 +153,11 @@ export function Dashboard() {
                                 <View>
                                     <View className='flex-row items-center justify-between  py-2'>
                                         <Logo />
-                                        <NotificationButton count={1} />
+                                        <View className='flex-row items-center gap-x-4'>
+                                            <ModeSitcher />
+                                            <NotificationButton count={1} />
+                                        </View>
+
                                     </View>
                                 </View>
                                 <View className=' mt-4 mb-6'>
@@ -211,6 +216,51 @@ export function Dashboard() {
         </View>
     )
 }
+
+export const ModeSitcher = () => {
+    const { colorScheme, setColorScheme, toggleColorScheme } = useColorScheme()
+    const style = useAnimatedStyle(() => ({
+        transform: [{ translateX: withSpring(colorScheme == "light" ? 0 : 28) }]
+    }))
+    const scheme = useNativeColorScheme()
+    const initialcolor = useStore(s => s.color)
+    const setColor = useStore(s => s.setColor)
+    const handlePress = (target?: "light" | "dark") => {
+        const color = target ?? (colorScheme == "light" ? "dark" : "light")
+        setColorScheme(color)
+        setColor(color)
+    }
+    const initialize = () => {
+        if (colorScheme !== initialcolor) {
+            if (initialcolor == "default") {
+                if(scheme) setColorScheme(scheme)
+            } else {
+                handlePress(initialcolor)
+            }
+        }
+
+    }
+    React.useEffect(() => {
+        initialize()
+    }, [])
+    return (
+        <Pressable onPress={() => toggleColorScheme()} className='relative bg-white dark:bg-dark-lighter rounded-full p-2 flex-row items-center gap-x-3'>
+            <View className='' style={{ position: "relative", zIndex: 10 }}>
+                <Svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <Path d="M9 13.875C11.6924 13.875 13.875 11.6924 13.875 9C13.875 6.30761 11.6924 4.125 9 4.125C6.30761 4.125 4.125 6.30761 4.125 9C4.125 11.6924 6.30761 13.875 9 13.875Z" stroke={colorScheme == "light" ? "white" : theme.extend.colors.gray[400]} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <Path d="M14.355 14.355L14.2575 14.2575M14.2575 3.7425L14.355 3.645L14.2575 3.7425ZM3.645 14.355L3.7425 14.2575L3.645 14.355ZM9 1.56V1.5V1.56ZM9 16.5V16.44V16.5ZM1.56 9H1.5H1.56ZM16.5 9H16.44H16.5ZM3.7425 3.7425L3.645 3.645L3.7425 3.7425Z" stroke={colorScheme == "light" ? "white" : theme.extend.colors.gray[400]} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+            </View>
+            <View style={{ position: "relative", zIndex: 10 }}>
+                <Svg width="18" height="18" viewBox="0 0 18 18" fill="none" >
+                    <Path d="M1.52251 9.315C1.79251 13.1775 5.07001 16.32 8.99251 16.4925C11.76 16.6125 14.235 15.3225 15.72 13.29C16.335 12.4575 16.005 11.9025 14.9775 12.09C14.475 12.18 13.9575 12.2175 13.4175 12.195C9.75001 12.045 6.75001 8.9775 6.73501 5.355C6.72751 4.38 6.93001 3.4575 7.29751 2.6175C7.70251 1.6875 7.21501 1.245 6.27751 1.6425C3.30751 2.895 1.27501 5.8875 1.52251 9.315Z" stroke={colorScheme == "light" ? "#828282" : "#fff"} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+
+            </View>
+            <Animated.View style={[{ zIndex: 0, left: 2 }, style]} className='absolute w-[27px] h-[27px] rounded-full bg-primary dark:bg-primary'></Animated.View>
+        </Pressable>
+    )
+}
 interface IServiceCard {
     image: React.ReactNode,
     title: React.ReactNode,
@@ -244,7 +294,11 @@ const EmplacementConfiguration = ({ adress }: { adress: IAddress }) => {
     const setAdress = useStore(s => s.setAddress)
     return (
         <TouchableOpacity onPress={() => {
-            setAdress(fomatAdressForLocalStorage(adress))
+            if (adress) {
+                const adresse = fomatAdressForLocalStorage(adress)
+                setAdress(adresse)
+            }
+
             router.push("/modal/configure-adress")
         }} className='flex-row items-center bg-primary-dark dark:bg-primary-dark-dark rounded-[20px] p-4 px-5 gap-x-4'>
             <View className='w-[40px] h-[40px] bg-primary dark:bg-primary-base-dark rounded-full justify-center items-center'>
@@ -256,7 +310,7 @@ const EmplacementConfiguration = ({ adress }: { adress: IAddress }) => {
             </View>
             <View className='gap-y-1 flex-1'>
                 <Text className='font-jakarta-semibold text-[16px] text-white'>{adress ? t("Votre emplacement actuel") : t("Configurer votre emplacement ")}</Text>
-                <Text className='text-[14px] text-white font-jakarta' numberOfLines={1} ellipsizeMode="tail" >{adress ? `${capitalize(adress.quartier)}, ${capitalize(adress.arrondissement)}, ${capitalize(adress.commune)}, ${capitalize(adress.departement)}` : t("Enrégistrez le lieu de récupération de vos linges")}</Text>
+                <Text className='text-[14px] text-white font-jakarta' numberOfLines={1} ellipsizeMode="tail" >{adress ? `${capitalize(adress.quartier)}, ${capitalize(adress.arrondissement)}, ${capitalize(adress.commune)}, ${capitalize(adress.departement ?? adress.departement)}` : t("Enrégistrez le lieu de récupération de vos linges")}</Text>
             </View>
             <View>
                 <Svg width="12" height="7" viewBox="0 0 12 7" fill="none">

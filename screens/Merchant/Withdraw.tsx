@@ -5,6 +5,7 @@ import { Input, InputLabel, InputPhoneNumber } from "@/components/Input"
 import { ActionModal } from "@/components/Modal"
 import { ErrorRetry } from "@/components/State"
 import { Text } from "@/components/Themed"
+import { EXPO_PUBLIC_API_URL } from "@/env"
 import { calculateFees, capitalize, clx, fnPart } from "@/helpler"
 import { useForm } from "@/hooks/useForm"
 import { country } from "@/storage/config"
@@ -93,7 +94,6 @@ export function Withdraw() {
                 amout: values.amount,
                 amoutToSend: amounts!.toReceiveAmount
             })
-            console.log(data)
             query.refetch()
             setShowModal(true)
         } catch (e) {
@@ -137,9 +137,9 @@ export function Withdraw() {
                                             </View>
                                         </View>
                                         <View className="py-6 px-4 border-b border-gray-300 dark:border-dark-400">
-                                            <TextInput className={clx("text-[70px] font-jakarta-semibold   p-4 p-4 text-[16px] text-white font-jakarta-medium placeholder:text-dark-300", form.amount.error ? "text-red dark:text-red-dark" : "text-dark dark:text-white")}
+                                            <TextInput className={clx("text-[70px] font-jakarta-semibold   p-4 p-4 text-[16px] dark:text-white font-jakarta-medium placeholder:text-dark-300", form.amount.error ? "text-red dark:text-red-dark" : "text-dark dark:text-white")}
                                                 onChangeText={(t) => {
-                                                    const value = t.replace(/(\s|\,)/g, '')
+                                                    const value = t.replace(/(\s|\,|[a-z])/ig, '')
                                                     if (onChangeText) onChangeText(value)
                                                 }}
                                                 value={form?.amount?.value ? fnPart(form?.amount?.value, country).main : undefined}
@@ -409,7 +409,7 @@ interface IEditPayment {
     accounts:IPaymentAccount[]
 }
 const EditPaymentMethod = ({ adress, onAdd, accounts }: IEditPayment) => {
-    const { form, setForm, field, isFormValid, getValues } = useForm({
+    const { form, setForm, field, isFormValid, getValues, handleTextChange } = useForm({
         method: {
             defaultValue: (adress?.adressMethodType) ?? accounts[0].adressMethodType
         },
@@ -474,7 +474,7 @@ const EditPaymentMethod = ({ adress, onAdd, accounts }: IEditPayment) => {
                     accounts.map((d) => {
                         const isActive = d.adressMethodType == form.method.value
                         return (
-                            <View className="flex-1 ">
+                            <View className="flex-1 " key={d.id}>
                                 <TouchableOpacity onPress={() => setForm(prev => ({ ...prev, method: { ...prev.method, value: d.adressMethodType } }))} className={clx("rounded-[15px] items-center  gap-y-2 p-2", isActive ? "bg-primary/10 dark:bg-primary/10" : "")}>
                                     <Image
                                         style={{
@@ -483,7 +483,7 @@ const EditPaymentMethod = ({ adress, onAdd, accounts }: IEditPayment) => {
                                             objectFit: "cover",
                                             borderRadius: 70
                                         }}
-                                        source={process.env.EXPO_PUBLIC_API_URL + "/assets/images/" + d.adressMethodType + ".png"}
+                                        source={EXPO_PUBLIC_API_URL + "/assets/images/" + d.adressMethodType + ".png"}
                                         className="rounded-full"
                                     />
                                     <View className="mt-1 flex-row items-center gap-x-2">
@@ -597,7 +597,7 @@ const AdressItem = ({
                         objectFit: "cover",
                         borderRadius: 70
                     }}
-                    source={process.env.EXPO_PUBLIC_API_URL + "/assets/images/" + d.adressMethodType + ".png"}
+                    source={EXPO_PUBLIC_API_URL + "/assets/images/" + d.adressMethodType + ".png"}
                     className="rounded-full"
                 />
                 <View className="">

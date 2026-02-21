@@ -13,8 +13,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { t } from 'i18next';
 import { useColorScheme } from 'nativewind';
 import { useMemo } from 'react';
-import { ScrollView, View } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ModeSitcher } from '../Client/Dashboard';
 
 export function Dashboard() {
     const { top } = useSafeAreaInsets()
@@ -43,7 +44,6 @@ export function Dashboard() {
     })
     const data = queryStatistics.data
     const isLoading = queryStatistics.isLoading
-    console.log(data)
     return (
         <View className='bg-primary flex-1'>
             <View className="bg-white flex-1 dark:bg-dark-bg" style={{}}>
@@ -83,7 +83,10 @@ export function Dashboard() {
                                 <View>
                                     <View className='flex-row items-center justify-between  py-2'>
                                         <Logo />
-                                        <NotificationButton count={1} />
+                                        <View className='flex-row items-center gap-x-4'>
+                                            <ModeSitcher />
+                                            <NotificationButton count={1} />
+                                        </View>
                                     </View>
                                 </View>
                                 <View className=' mt-4 mb-6'>
@@ -104,7 +107,9 @@ export function Dashboard() {
                             </View>
                         </LinearGradient>
                     </View>
-                    <ScrollView className='flex-1' style={{ paddingBottom: bottom + 100 }}>
+                    <ScrollView  refreshControl={
+                        <RefreshControl refreshing={!!(queryStatistics.isLoading && queryStatistics.data)} onRefresh={queryStatistics.refetch} />
+                    } className='flex-1' style={{ paddingBottom: bottom + 100 }}>
                         <View className='mt-8 px-4'>
                             <Text className='text-[20px] font-jakarta-bold text-primary dark:text-primary '>{t("Statistiques")}</Text>
                         </View>
@@ -119,7 +124,7 @@ export function Dashboard() {
                                                 <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full ", 'flex-row flex-1 justify-end')}>
                                                     {
                                                         !isNaN(data?.commandTotal!) ? (
-                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right flex-1 '>{data?.commandTotal??0}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("Kg")}</Text></Text>
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right flex-1 '>{data?.commandTotal ?? 0}</Text>
                                                         ) : <></>
                                                     }
                                                 </View>
@@ -128,10 +133,10 @@ export function Dashboard() {
                                         <View className='rounded-[20px]  flex-1  p-4 bg-white shadow-lg dark:bg-dark-lighter  h-[120px] justify-between'>
                                             <Text className='font-jakarta-medium text-dark-400 text-[14px] dark:text-gray-200'>{t("Kg totaux traitées")}</Text>
                                             <View className='flex-row justify-end'>
-                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full",  'flex-row flex-1 justify-end')}>
+                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full", 'flex-row flex-1 justify-end')}>
                                                     {
                                                         !isNaN(data?.totalKg!) ? (
-                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{data?.totalKg??0}</Text>
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{data?.totalKg ?? 0}</Text>
                                                         ) : <></>
                                                     }
                                                 </View>
@@ -143,10 +148,10 @@ export function Dashboard() {
                                         <View className='mt-4 rounded-[20px]  flex-1  p-4 bg-white shadow-lg dark:bg-dark-lighter  h-[120px] justify-between'>
                                             <Text className='font-jakarta-medium text-dark-400 text-[14px] dark:text-gray-200'>{t("Revenus total généré")}</Text>
                                             <View className='flex-row justify-end'>
-                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full",  'flex-row flex-1 justify-end')}>
+                                                <View className={clx(isLoading && "bg-dark-300 h-[30px] w-6/12 rounded-full", 'flex-row flex-1 justify-end')}>
                                                     {
                                                         !isNaN(data?.incomes!) ? (
-                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{Decimal(data?.incomes??0).toNumber()}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("f")}</Text></Text>
+                                                            <Text className='font-jakarta-bold text-[30px] text-primary dark:text-primary text-right'>{Decimal(data?.incomes ?? 0).toNumber()}<Text className='font-jakarta-bold text-[16px] text-primary dark:text-primary'> {t("f")}</Text></Text>
                                                         ) : <></>
                                                     }
                                                 </View>
@@ -161,8 +166,8 @@ export function Dashboard() {
                         }
                         {
                             query.isError ? (
-                                    <ErrorRetry retry={queryStatistics.refetch}/>
-                                ):<></>
+                                <ErrorRetry retry={queryStatistics.refetch} />
+                            ) : <></>
                         }
                     </ScrollView>
                 </View>

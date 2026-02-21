@@ -48,7 +48,7 @@ export function ConfigureAdress() {
             })
         },
         department: {
-            defaultValue: (address?.department) ?? '',
+            defaultValue: (address?.departement) ?? '',
             validator: Joi.string().min(3).messages({
                 "string.base": "Le département doit être une chaîne de caractères.",
                 "string.empty": "Le département est obligatoire.",
@@ -177,6 +177,7 @@ export function ConfigureAdress() {
                     text: t("Pas maintenant"),
                     onPress() {
                         requireLocation.current = false
+                        if(addLocation)setAddLocation(false)
                         handleSubmit()
                     }
                 },

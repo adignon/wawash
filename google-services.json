@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "508570156897",
+    "project_id": "waklin-59e1a",
+    "storage_bucket": "waklin-59e1a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508570156897:android:dea7f806bb9a942537cf20",
+        "android_client_info": {
+          "package_name": "com.tikketplus.wawash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrp2jN9csG3JMyJFptX69-QlUfqMpw3SA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

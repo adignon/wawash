@@ -96,7 +96,7 @@ export function OtpVerification() {
                         source={require("@/assets/images/logos/logo-with-bg.svg")}
                         style={{
                             width: 209,
-                            height: 209
+                            height: 170
                         }}
                     />
                 </View>

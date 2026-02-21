@@ -10,9 +10,8 @@ import { IInvoice, IOrder } from "@/store/type";
 import { theme } from "@/tailwind.config";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addDays, format, isSameDay, isToday, isTomorrow } from "date-fns";
+import { addDays, addHours, format, isSameDay, isToday, isTomorrow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Decimal } from "decimal.js";
 import { useLocalSearchParams } from "expo-router";
 import { t } from "i18next";
 import { useColorScheme } from "nativewind";
@@ -24,6 +23,33 @@ import Toast from "react-native-toast-message";
 import { StatusItem } from "./Histories";
 import { PaymentModal } from "./SubscriptionForm";
 
+
+const formatFrenchSmartDate = (order:IOrder) => {
+    const date = addHours(new Date(order.executionDate), order.executionDuration ?? 48)
+    const now = new Date()
+    const afterTomorrow = addDays(now, 2)
+    let prefix = ""
+
+    if (isToday(date)) {
+        prefix = t("Aujourd'hui")
+    } else if (isTomorrow(date)) {
+        prefix = t("Demain")
+    } else if (isSameDay(date, afterTomorrow)) {
+        prefix = t("Après-demain")
+    } else {
+        const dayLabel = format(date, "EE d", { locale: fr })
+        prefix = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)
+    }
+    console.log(order.pickingHours[1])
+    const [h, m] = order.pickingHours[1].split(":")
+    const n = new Date()
+    n.setHours(Number(h), Number(m), 0, 0)
+    const timePart = format(n, "HH:mm", { locale: fr })
+    return {
+        prefix,
+        timePart
+    }
+}
 export function Order() {
     const { orderString, id } = useLocalSearchParams<{ orderString: string, id: string }>()
     const orderParsed = useMemo(() => {
@@ -52,7 +78,7 @@ export function Order() {
     })
     const { bottom } = useSafeAreaInsets()
     if (order) {
-
+        const dateString=formatFrenchSmartDate(order)
         const Steps = [
             {
                 title: order.hasStarted ? t("Commande démarrée") : t("La commande démarre " + getOrderExecutionDayName(order).toLowerCase()),
@@ -77,7 +103,7 @@ export function Order() {
                     <View className="flex-row items-center gap-x-2">
                         <Text className="font-jakarta text-[14px] text-dark-300 dark:text-gray-400">{`${order.pickingHours[0]} - ${order.pickingHours[1]}`}</Text>
                         {
-                            ( order.userKg ) &&
+                            (order.userKg) &&
                             <>
                                 <View className="w-[3px] h-[3px] rounded-full bg-dark-300 dark:bg-gray"></View>
                                 <Text className="font-jakarta text-[14px] text-dark-300 dark:text-gray-400">{order.userKg ? `${order.userKg}Kg collectés` : t("En cours")}</Text>
@@ -125,7 +151,7 @@ export function Order() {
                 title: t("Livraison"),
                 description: (
                     <View className="flex-row items-center gap-x-2">
-                        <Text className="font-jakarta text-[14px] text-dark-300 dark:text-gray-400">{`${order.pickingHours[0]} - ${order.pickingHours[1]}`}</Text>
+                        <Text className="font-jakarta text-[14px] text-dark-300 dark:text-gray-400">{t("Livré au plus tard le {{date}} de ",{date:dateString.prefix})}{`${order.pickingHours[0]} - ${order.pickingHours[1]}`}</Text>
                         {
                             order.hasStarted && ["STARTED", "PICKED", "WASHING"].includes(order.status) &&
                             <>
@@ -156,10 +182,9 @@ export function Order() {
         const lastActiveIndex = [...Steps, {}].findIndex((s: any) => !s.isActive) - 1
 
         const factureDate = useMemo(() => {
-            const add_kgWeight = Decimal(order.userKg ?? 0).minus(Decimal(order.capacityKg)).toNumber()
             return {
-                add_kgWeight,
-                add_price: fnPart(Decimal(add_kgWeight).mul(order.customerOrderKgPrice!).toNumber(), country).main
+                add_kgWeight: order.commandAdditionnalKg ?? 0,
+                add_price: fnPart(order.customerFeesToPay ?? 0, country).main
             }
         }, [order])
 
@@ -208,7 +233,19 @@ export function Order() {
                     <Header
                         title={t("Suivi de commande")}
                     />
-                    <ScrollView contentContainerClassName="flex-1"
+                    <View className="px-4 my-8 flex-row items-center justify-between ">
+                        <View className="flex-row items-center gap-x-2">
+                            <Text className="text-[20px] font-jakarta-semibold text-primary dark:text-primary-500">{capitalize(format(order.executionDate, "dd MMMM", {
+                                locale: fr
+                            }))}</Text>
+                            <View className="w-[4px] h-[4px] rouded-full rounded-full bg-dark-300 dark:bg-gray"></View>
+                            <Text className="font-jakarta-semibold text-14px text-dark-300 dark:text-dark-400">ID: #{order.orderId}</Text>
+                        </View>
+                        <View>
+                            <StatusItem order={order} />
+                        </View>
+                    </View>
+                    <ScrollView className="flex-1"
                         refreshControl={
                             <RefreshControl
                                 refreshing={!!orderQuery.data && orderQuery.isPending}
@@ -217,27 +254,27 @@ export function Order() {
                         }
                     >
                         <View className="flex-1 ">
-                            <View className="px-4 my-8 flex-row items-center justify-between ">
-                                <View className="flex-row items-center gap-x-2">
-                                    <Text className="text-[20px] font-jakarta-semibold text-primary dark:text-primary-500">{capitalize(format(order.executionDate, "dd MMMM", {
-                                        locale: fr
-                                    }))}</Text>
-                                    <View className="w-[4px] h-[4px] rouded-full rounded-full bg-dark-300 dark:bg-gray"></View>
-                                    <Text className="font-jakarta-semibold text-14px text-dark-300 dark:text-dark-400">ID: #{order.orderId}</Text>
-                                </View>
-                                <View>
-                                    <StatusItem order={order} />
-                                </View>
-                            </View>
+
                             {
                                 order.status == "READY" && (
                                     <View className="px-4">
                                         <WarningAlert
                                             title={t("Livraison démarrée")}
-                                            description={ order.invoice && order.invoice?.status != "SUCCESS" ? t("Vous serez livré bientot. Veuillez régler votre facture en attente pour récupérer vos linges"):""}
+                                            description={order.invoice && order.invoice?.status != "SUCCESS" ? t("Vous serez livré bientot. Veuillez régler votre facture en attente pour récupérer vos linges") : ""}
                                         />
                                     </View>
                                 )
+                            }
+                            {
+                                ["CREATED", "PENDING"].includes(order?.invoice?.status) ? (
+                                    <View className="px-4">
+                                        <WarningAlert
+                                            color="danger"
+                                            title={t("Surplus enrégistré sur la commande")}
+                                            description={t("Vous avez épuisé vos Kg sur votre abonnement. Une facutre a été générée pour le surplus enrégistré. Vous devez payer la facture avant la livraison de vos linges.")}
+                                        />
+                                    </View>
+                                ) : <></>
                             }
                             <View className="relative">
                                 <View className="bg-primary-400/20 absolute z-10" style={{ height: lastActiveIndex > 0 ? lastActiveIndex * 80 : 0, width: 1, left: 33, top: 35 }}></View>
@@ -292,24 +329,25 @@ export function Order() {
                             </View>
 
                         </View>
-                        {
-                            order?.status == "READY" && (
-                                <View className="px-4" style={{ marginBottom: bottom }}>
-                                    <Button.Primary onPress={() => {
-                                        handleSubmitAction()
-                                    }} className=" bg-green dark:bg-green-dark-500">
-                                        <View className="flex-row items-center gap-x-2 justify-center">
-                                            <Svg width="21" height="20" viewBox="0 0 21 20" fill="none" >
-                                                <Path d="M10.5 17.5C12.2352 17.5 13.9166 16.8984 15.2579 15.7976C16.5992 14.6968 17.5174 13.165 17.8559 11.4632C18.1944 9.76135 17.9324 7.9948 17.1144 6.46453C16.2965 4.93425 14.9732 3.73492 13.3701 3.0709C11.767 2.40689 9.98332 2.31926 8.32287 2.82295C6.66242 3.32664 5.22799 4.39049 4.26398 5.83322C3.29997 7.27596 2.86604 9.00832 3.03611 10.7351C3.20619 12.4619 3.96975 14.0764 5.1967 15.3033" stroke={colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]} strokeWidth="1.5" strokeLinecap="round" />
-                                                <Path d="M13.8334 8.33325L11.0688 11.6508C10.4132 12.4375 10.0854 12.8308 9.64482 12.8508C9.20425 12.8708 8.8422 12.5087 8.1181 11.7846L7.16671 10.8333" stroke={colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]} strokeWidth="1.5" strokeLinecap="round" />
-                                            </Svg>
-                                            <Text className="font-jakarta-medium text-[14px] text-white dark:text-gray-200">{t("Marquer comme reçu")}</Text>
-                                        </View>
-                                    </Button.Primary>
-                                </View>
-                            )
-                        }
+
                     </ScrollView>
+                    {
+                        order?.status == "READY" && (
+                            <View className="px-4" style={{ marginBottom: bottom }}>
+                                <Button.Primary onPress={() => {
+                                    handleSubmitAction()
+                                }} className=" bg-green dark:bg-green-dark-500">
+                                    <View className="flex-row items-center gap-x-2 justify-center">
+                                        <Svg width="21" height="20" viewBox="0 0 21 20" fill="none" >
+                                            <Path d="M10.5 17.5C12.2352 17.5 13.9166 16.8984 15.2579 15.7976C16.5992 14.6968 17.5174 13.165 17.8559 11.4632C18.1944 9.76135 17.9324 7.9948 17.1144 6.46453C16.2965 4.93425 14.9732 3.73492 13.3701 3.0709C11.767 2.40689 9.98332 2.31926 8.32287 2.82295C6.66242 3.32664 5.22799 4.39049 4.26398 5.83322C3.29997 7.27596 2.86604 9.00832 3.03611 10.7351C3.20619 12.4619 3.96975 14.0764 5.1967 15.3033" stroke={colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]} strokeWidth="1.5" strokeLinecap="round" />
+                                            <Path d="M13.8334 8.33325L11.0688 11.6508C10.4132 12.4375 10.0854 12.8308 9.64482 12.8508C9.20425 12.8708 8.8422 12.5087 8.1181 11.7846L7.16671 10.8333" stroke={colorScheme == "light" ? "#fff" : theme.extend.colors.gray[100]} strokeWidth="1.5" strokeLinecap="round" />
+                                        </Svg>
+                                        <Text className="font-jakarta-medium text-[14px] text-white dark:text-gray-200">{t("Marquer comme reçu")}</Text>
+                                    </View>
+                                </Button.Primary>
+                            </View>
+                        )
+                    }
                 </View>
 
                 <DetailModal
@@ -405,29 +443,7 @@ function DetailModal({ order, type = "description", show, onClose, refetchOrder 
         "SHIPPING_FAST": t("Livraison rapide"),
         "SHIPPING_PRIORITIZED": t("Livraison priorisé"),
     }
-    const formatFrenchSmartDate = () => {
-        const date = new Date(order.executionDate)
-        const now = new Date()
-        const afterTomorrow = addDays(now, 2)
-        let prefix = ""
 
-        if (isToday(date)) {
-            prefix = t("Aujourd'hui")
-        } else if (isTomorrow(date)) {
-            prefix = t("Demain")
-        } else if (isSameDay(date, afterTomorrow)) {
-            prefix = t("Après-demain")
-        } else {
-            const dayLabel = format(date, "EEEE d", { locale: fr })
-            prefix = dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)
-        }
-        console.log(order.pickingHours[1])
-        const [h, m] = order.pickingHours[1].split(":")
-        const n = new Date()
-        n.setHours(Number(h), Number(m), 0, 0)
-        const timePart = format(n, "HH:mm", { locale: fr })
-        return `${prefix} à ${timePart}`
-    }
     const { colorScheme } = useColorScheme()
     const mutation = useMutation({
         mutationKey: ["commmand-pay"],
@@ -541,6 +557,7 @@ function DetailModal({ order, type = "description", show, onClose, refetchOrder 
 
         )
     }
+    const dateString=formatFrenchSmartDate(order)
     return (
         <>
             <ActionModal show={show} title={t("Description de la commande")} onClose={onClose}>
@@ -563,8 +580,9 @@ function DetailModal({ order, type = "description", show, onClose, refetchOrder 
                             <View className="flex-row items-center gap-x-2 flex-1">
                                 <Text className="font-jakarta text-[14px] text-dark-300 dark:text-gray-400">{`~${order.executionDuration}h approx`}</Text>
                                 <View className="w-[3px] h-[3px] rounded-full bg-dark-300 dark:bg-gray"></View>
-                                <Text className="font-jakarta text-[14px] text-dark-300 dark:text-gray-400">{t("Au plus {{date}}", {
-                                    date: formatFrenchSmartDate().toLowerCase()
+                                <Text className="font-jakarta text-[14px] text-dark-300 dark:text-gray-400">{t("Au plus le {{date}} à {{time}}", {
+                                    date: dateString.prefix.toLowerCase(),
+                                    time:dateString.timePart.toLowerCase(),
                                 })}</Text>
                             </View>
                         </View>
@@ -628,7 +646,7 @@ export function StatusInvoice({ invoice, contained, icon }: { icon?: boolean, in
                 </View>
             </View>
         )
-    }else {
+    } else {
         return (
             <View className={clx("flex-row items-center gap-x-2 px-1.5 py-1 rounded-[5px] ", !contained ? "bg-red/10 dark:bg-red-500/10" : "bg-red dark:bg-red-500")}>
                 <View>

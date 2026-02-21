@@ -90,7 +90,7 @@ export function Notification() {
                     return (
                         <View className="flex-row relative">
                             <View className={clx("p-2 py-1 absolute  rounded-[5px] ", isTitleActive ? "bg-primary/10" : "bg-gray-100 dark:bg-dark/30")}>
-                                <Text className={clx("font-jakarta-medium text-[12px]", isTitleActive ? "text-primary dark:text-primary" : "text-dark-300 dark:text-dark-400")}>{title}</Text>
+                                <Text className={clx("font-jakarta-medium text-[10px]", isTitleActive ? "text-primary dark:text-primary" : "text-dark-300 dark:text-dark-400")}>{title}</Text>
                             </View>
                         </View>
                     )
@@ -106,7 +106,7 @@ const NotificationItem = ({ notification }: {
     const {colorScheme}=useColorScheme()
     return (
         <View className="mb-8 flex-row ">
-            <View className="w-[60px]"></View>
+            <View className="w-[70px]"></View>
             <View className="relative flex-1">
                 <View className="absolute " style={{ left: -15 }}>
                     <Svg width="30" height="29" viewBox="0 0 17 15" fill="none">

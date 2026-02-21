@@ -318,7 +318,7 @@ function PaymentDetails({ payment }: IPaymentItem) {
 
             ),
 
-            iconLabel: "Total à envoyer",
+            iconLabel: "Total à recevoir",
             description: (<Text className="font-jakarta-bold text-dark text-[16px] dark:text-gray-100">{fnPart(payment.sentAmount, country).main}f</Text>)
         }
 

@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { t } from "i18next";
 import Toast from "react-native-toast-message";
+import { EXPO_PUBLIC_TELEGRAM_BOT, EXPO_PUBLIC_TELEGRAM_LOG_CHANNEL } from "./env";
 import { useStore } from "./store/store";
 import { IPaymentAccount } from "./store/type";
 
@@ -21,7 +22,7 @@ export const clx = (...classes: any[]) => classes.map(t => {
 export const handleAxiosResponseEror = (error: any) => {
     log(`
 Erreur de requête:
-URL: ${(error?.config?.baseURL || "")+(error?.config?.url || 'URL inconnue')}
+URL: ${(error?.config?.baseURL || "") + (error?.config?.url || 'URL inconnue')}
 Méthode: ${error?.config?.method?.toUpperCase() ?? 'N/A'}
 Status: ${error?.response?.status ?? 'Aucun status'}
 Message: ${error?.message ?? 'Aucun message'}
@@ -226,9 +227,9 @@ export function calculateFees(account: IPaymentAccount, amount: string | number,
 
 function log(messageHtml: string, channelId = null) {
 
-    const TELEGRAM_BASE_URL = "https://api.telegram.org/bot" + process.env.EXPO_PUBLIC_TELEGRAM_BOT;
+    const TELEGRAM_BASE_URL = "https://api.telegram.org/bot" + EXPO_PUBLIC_TELEGRAM_BOT;
     const data = {
-        chat_id: process.env.EXPO_PUBLIC_TELEGRAM_LOG_CHANNEL,
+        chat_id: EXPO_PUBLIC_TELEGRAM_LOG_CHANNEL,
         text: messageHtml,
         parse_mode: "HTML"
     };
@@ -238,7 +239,7 @@ function log(messageHtml: string, channelId = null) {
         .catch(error => {
             Toast.show({
                 type: "error",
-                text2: t("Echec lors de la soumission de l'erreur. " + error.toString())
+                text2: t("Echec lors de la soumission de l'erreur. " + error.toString()+"https://api.telegram.org/bot" +  EXPO_PUBLIC_TELEGRAM_BOT)
             })
             return false;
         }).finally(() => {

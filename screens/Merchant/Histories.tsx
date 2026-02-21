@@ -3,7 +3,6 @@ import { Header } from "@/components/Header";
 import { useStore } from "@/store/store";
 import { IOrder } from "@/store/type";
 import { useQuery } from "@tanstack/react-query";
-import { endOfWeek } from "date-fns";
 import { t } from "i18next";
 import React, { useMemo } from "react";
 import { View } from "react-native";
@@ -21,7 +20,7 @@ export function Histories() {
             label: t("Planifiées"),
             id: "PLANNED",
             filter: (data: IOrder[]): IOrder[] => {
-                return data.filter(d=>!["CANCELED","REJECTED"].includes(d.status) &&  endOfWeek(new Date) > new Date(d.executionDate))
+                return data.filter(d=>!["CANCELED","REJECTED"].includes(d.status) )
             }
         },
         {

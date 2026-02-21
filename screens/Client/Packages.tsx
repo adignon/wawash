@@ -11,7 +11,7 @@ import { theme } from "@/tailwind.config";
 import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { t } from "i18next";
 import { useColorScheme } from "nativewind";
 import React, { useMemo } from "react";
@@ -28,20 +28,18 @@ export function Packages({ filterPackage, showActive = true, allowSubscriptionCa
         queryKey: ['packagess'],
         enabled: showActive
     })
+    
     const activeSubscription = useMemo(() => {
-        if(packages.data?.subscription && user?.activeSubscription?.id!=packages.data?.subscription.id){
+        if(packages.data?.subscription ){
             return packages.data?.subscription
-        }else if (user?.activeSubscription?.id && new Date(user.activeSubscription.endAt) > new Date() && user.activeSubscription.isPaid) {
+        }else if (packages.data?.subscription && user?.activeSubscription?.id && new Date(user.activeSubscription.endAt) > new Date() && user.activeSubscription.isPaid) {
             return user?.activeSubscription
         } 
     }, [user, packages.data])
-    const {colorScheme}=useColorScheme()
-
     const data = useMemo(() => {
         const data = !!(packages.data?.packages) ? packages.data.packages.sort((a: any, b: any) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" })) : []
         return filterPackage ? filterPackage(data as any) : data
     }, [packages.data])
-    const params = useLocalSearchParams()
 
     if (showActive && activeSubscription) {
         return (
@@ -72,7 +70,7 @@ export function Packages({ filterPackage, showActive = true, allowSubscriptionCa
                     )
                 }
                 {
-                    data && (
+                    (data?.length) ? (
                         <ScrollView style={{
 
                         }}
@@ -89,11 +87,11 @@ export function Packages({ filterPackage, showActive = true, allowSubscriptionCa
                             }
                             <View style={{ marginBottom: bottom + 120 }}></View>
                         </ScrollView>
-                    )
+                    ):<></>
                 }
                 {
                     packages.isError && (
-                        <View className="flex-1">
+                        <View className="flex-1 ">
                             <ErrorRetry retry={packages.refetch} />
                         </View>
                     )

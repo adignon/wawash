@@ -42,7 +42,6 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
             return request
         }
     }, [request, activeSubscription])
-    console.log(query.data)
     const { top, bottom } = useSafeAreaInsets()
     const { colorScheme } = useColorScheme()
     const prices = useMemo(() => {
@@ -75,7 +74,7 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
                         nombreDePersonnesMin,
                     } = data;
 
-                    let phrase = "Jusqu'à " + kg + "kg de linge";
+                    let phrase = "Jusqu'à " + Decimal(kg).toNumber() + "kg de linge";
 
                     const jours =
                         nombreDeJoursDeVetementMin && nombreDeJoursDeVetementMax
@@ -92,8 +91,8 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
                                 : null;
 
                     if (jours || personnes) {
-                        phrase += ", soit l'équivalent de";
-                        if (jours) phrase += ` ${jours} de tenues complètes`;
+                        phrase += ", soit l'équivalent de 2 tenues complètes par jours ";
+                        if (jours) phrase += `pendant ${jours} `;
                         phrase += " chaque semaine"
                         if (personnes) phrase += ` pour ${personnes}`;
                     }
@@ -349,12 +348,16 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
                                                         params.unique ?
                                                             <Text className="font-jakarta-bold text-[25px] text-dark dark:text-white">{t("Cout par kg")}</Text>
                                                             :
-                                                            <Text className="font-jakarta-bold text-[25px] text-dark dark:text-white">{Number(params.kg)}{t("Kg")}<Text className="text-[16px] text-dark">{t("/semaine")}</Text></Text>
+                                                            <Text className="font-jakarta-bold text-[25px] text-dark dark:text-white">{activeSubscription ? activeSubscription.remainingKg : Number(params.kg)+t("Kg")}<Text className="text-[16px] text-dark">{activeSubscription ? `/${activeSubscription.commandPaidKg} kg restants`  : t("/semaine")}</Text></Text>
                                                     }
                                                 </View>
                                                 <View className="gap-y-1 items-end">
-                                                    <Text className="font-jakarta-bold text-primary-500 text-[25px] dark:text-white">{prices?.main}f<Text className="text-[14px] text-primary-500">{params.unique ? t("/kg") : t("/sem")}</Text></Text>
-                                                    <Text className="font-dark-400 text-[14px] font-jakarta-medium">{(!params.unique ? t("Facturé par mois") : t("Facture unique"))}</Text>
+                                                    <Text className="font-jakarta-bold text-primary-500 text-[25px] dark:text-white">{activeSubscription ? fnPart(activeSubscription.price,country).main : prices?.main }f<Text className="text-[14px] text-primary-500">{params.unique ? t("/kg") : (activeSubscription ? t("/mois") :t("/sem"))}</Text></Text>
+                                                    {
+                                                        !activeSubscription && (
+                                                            <Text className="font-dark-400 text-[14px] font-jakarta-medium">{(!params.unique ? t("Facturé par mois") : t("Facture unique"))}</Text>
+                                                        )
+                                                    }
                                                 </View>
                                             </View>
                                             {
@@ -396,7 +399,12 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
                                                         />
                                                         <View className="mt-4 flex-row justify-between items-center">
                                                             <Text className="font-jakarta-semibold-semibold text-[12px] text-dark-300 dark:text-gray-400">{t("Status de l'abonnement")}</Text>
-                                                            <View className="p-2 py-1 rounded-full bg-green-500 dark:bg-green-dark-500"><Text className="text-white dark:text-gray-100 font-jakarta text-[12px]">{t("En cours")}</Text></View>
+                                                            {
+                                                                activeSubscription.isActive ?
+                                                                <View className="p-2 py-1 rounded-full bg-green-500 dark:bg-green-dark-500"><Text className="text-white dark:text-gray-100 font-jakarta text-[12px]">{t("En cours")}</Text></View>
+                                                                :
+                                                                <View className="p-2 py-1 rounded-full bg-gray-200 dark:bg-dark-border"><Text className="text-white  dark:text-dark-300 font-jakarta text-[12px]">{t("Expirée")}</Text></View>
+                                                            }
                                                         </View>
                                                     </View>
                                                 )
@@ -462,8 +470,8 @@ export function PackageDetails({ activeSubscription, subscriptionRefreshProps }:
                                                             params,
                                                         })} label={
                                                             <Text className="font-jakarta-semibold text-white">{params?.unique ? t("Commander") : t("Souscrire - {{price}}f", {
-                                                                price: fnPart(new Decimal(params.amount).mul(4).toString(), country).main
-                                                            })}{!params.unique ? <Text className="text-[12px] text-white font-jakarta-semibold">{t("/mo")}</Text> : <></>}</Text>
+                                                                price: fnPart(new Decimal(params.amount).toString(), country).main
+                                                            })}{!params.unique ? <Text className="text-[12px] text-white font-jakarta-semibold">{t("/sem")}</Text> : <></>}</Text>
                                                         } />
                                                     </View>
                                                 </View>

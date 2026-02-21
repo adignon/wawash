@@ -140,7 +140,7 @@ export function useForm(params: IFormParam) {
         }
         return values
     }
-    const returns = { form, setForm, field, isFormValid, getValues, reset }
+    const returns = { form, setForm, field, isFormValid, getValues, reset, handleTextChange }
 
     return (
         returns

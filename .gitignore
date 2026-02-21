@@ -22,7 +22,8 @@ ios/
 .env
 # Metro
 .metro-health-check*
-
+@*
+*.aab
 # debug
 npm-debug.*
 yarn-debug.*

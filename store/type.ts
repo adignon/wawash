@@ -17,7 +17,7 @@ export type IAddress = {
   commune: string,
   contactFullname: string,
   contactPhone: string,
-  department: string,
+  departement: string,
   country: string,
   quartier: string,
   userId: string,
@@ -32,6 +32,7 @@ export interface IOrder {
   id: number,
   invoiceId: number,
   invoice: IInvoice,
+  commandAdditionnalKg:number|null
   orderId: string,
   pickingHours: [string, string]
   executionDuration?: number,
@@ -117,6 +118,9 @@ export interface IInvoice {
 export interface ICommand {
   id: number;
   commandType: string;
+  commandPaidKg:number
+  commandKg:number
+  remainingKg:number
   commandDescription: string,
   packageId: number,
   totalExecution: number;

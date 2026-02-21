@@ -32,7 +32,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.adignon.waklin"
+      "package": "com.tikketplus.wawash",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

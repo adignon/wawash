@@ -103,8 +103,8 @@ export function SectionHistories({ query, user, orders }: ISectionHistories) {
         })
         return Object.values(sections) as any
     }, [orders])
-    const {height}=useWindowDimensions()
-    const {top, bottom:bottomArea}=useSafeAreaInsets()
+    const { height } = useWindowDimensions()
+    const { top, bottom: bottomArea } = useSafeAreaInsets()
     return (
         <SectionList
             refreshControl={
@@ -126,7 +126,7 @@ export function SectionHistories({ query, user, orders }: ISectionHistories) {
                 )
             }}
             ListEmptyComponent={
-                query.isSuccess && !orders?.length ? (<View style={{height:height-top-bottomArea-100-70}} className="flex-1 items-center justify-center">
+                query.isSuccess && !orders?.length ? (<View style={{ height: height - top - bottomArea - 100 - 70 }} className="flex-1 items-center justify-center">
                     <Text className="text-dark-300 font-jakarta text-[14px] text-center dark:text-gray-300">{t("Aucune commande enrégistrée")}</Text>
                 </View>) : <></>
             }
@@ -147,6 +147,7 @@ interface IHistoryItem {
 export const HistoryItem = ({ order }: IHistoryItem) => {
     const { colorScheme } = useColorScheme()
     const user = useStore(s => s.user)
+    const hasNotPaidInvoice = ["PENDING", "CREATED"].includes(order.invoice?.status) && user?.role == "CLIENT"
     return (
         <TouchableOpacity className="p-4 " onPress={() => router.push({
             pathname: user?.role == "CLEANER" ? "/nolayout/merchant/order-details" : "/nolayout/client/order",
@@ -157,20 +158,32 @@ export const HistoryItem = ({ order }: IHistoryItem) => {
         })}>
             <View className="p-4 rounded-[20px] bg-white dark:bg-dark-dark-bg flex-row justify-between items-center">
                 <View className="flex-row items-center gap-x-4">
-                    <View className="items-center justify-center h-[40px] w-[40px] rounded-full bg-primary/20 ">
-                        <Svg width="21" height="18" viewBox="0 0 21 18" fill="none" >
-                            <Path fillRule="evenodd" clipRule="evenodd" d="M0 0.211678L2.77268 16.1073V18H18.2273V16.1073L21 0.211678L19.782 0L19.4046 2.16341C18.6244 2.69196 17.5716 2.94511 16.5464 2.66271C16.1653 2.55775 15.1177 2.09097 14.4947 1.78006L14.1739 1.61992L13.8754 1.81855C12.9458 2.43713 12.0769 2.99307 10.8183 2.99307C9.56193 2.99307 8.54704 2.35093 7.7654 1.8214L7.40679 1.57846L7.05573 1.83215C6.62063 2.14655 5.42497 2.77581 4.61608 3.01936C4.20099 3.14434 3.53119 3.21835 2.87181 3.21736C2.54795 3.21687 2.24419 3.19824 1.99382 3.16368C1.90397 3.15128 1.82727 3.13763 1.76295 3.12389L1.21805 0L0 0.211678ZM1.98661 4.40614L4.00905 16.0006V16.7659H16.991V16.0006L19.1388 3.68716C18.2593 4.02906 17.2379 4.1334 16.2175 3.85232C15.7846 3.73308 14.8996 3.34389 14.265 3.04125C13.3916 3.61196 12.3138 4.22715 10.8183 4.22715C9.37236 4.22715 8.20731 3.5862 7.41444 3.07126C6.77144 3.46162 5.7481 3.96752 4.97314 4.20086C4.39454 4.37507 3.58926 4.45252 2.86995 4.45143C2.5652 4.45098 2.26323 4.43644 1.98661 4.40614ZM9.27279 11.1067C9.27279 11.7883 8.71925 12.3408 8.03642 12.3408C7.35359 12.3408 6.80005 11.7883 6.80005 11.1067C6.80005 10.4252 7.35359 9.87264 8.03642 9.87264C8.71925 9.87264 9.27279 10.4252 9.27279 11.1067ZM12.9819 12.3408C13.6647 12.3408 14.2183 11.7883 14.2183 11.1067C14.2183 10.4252 13.6647 9.87264 12.9819 9.87264C12.2991 9.87264 11.7455 10.4252 11.7455 11.1067C11.7455 11.7883 12.2991 12.3408 12.9819 12.3408Z" fill={theme.extend.colors.primary.DEFAULT} />
-                        </Svg>
-                    </View>
+
+                    {
+                        !hasNotPaidInvoice ? <View className="items-center justify-center h-[40px] w-[40px] rounded-full bg-primary/20 ">
+                            <Svg width="21" height="18" viewBox="0 0 21 18" fill="none" >
+                                <Path fillRule="evenodd" clipRule="evenodd" d="M0 0.211678L2.77268 16.1073V18H18.2273V16.1073L21 0.211678L19.782 0L19.4046 2.16341C18.6244 2.69196 17.5716 2.94511 16.5464 2.66271C16.1653 2.55775 15.1177 2.09097 14.4947 1.78006L14.1739 1.61992L13.8754 1.81855C12.9458 2.43713 12.0769 2.99307 10.8183 2.99307C9.56193 2.99307 8.54704 2.35093 7.7654 1.8214L7.40679 1.57846L7.05573 1.83215C6.62063 2.14655 5.42497 2.77581 4.61608 3.01936C4.20099 3.14434 3.53119 3.21835 2.87181 3.21736C2.54795 3.21687 2.24419 3.19824 1.99382 3.16368C1.90397 3.15128 1.82727 3.13763 1.76295 3.12389L1.21805 0L0 0.211678ZM1.98661 4.40614L4.00905 16.0006V16.7659H16.991V16.0006L19.1388 3.68716C18.2593 4.02906 17.2379 4.1334 16.2175 3.85232C15.7846 3.73308 14.8996 3.34389 14.265 3.04125C13.3916 3.61196 12.3138 4.22715 10.8183 4.22715C9.37236 4.22715 8.20731 3.5862 7.41444 3.07126C6.77144 3.46162 5.7481 3.96752 4.97314 4.20086C4.39454 4.37507 3.58926 4.45252 2.86995 4.45143C2.5652 4.45098 2.26323 4.43644 1.98661 4.40614ZM9.27279 11.1067C9.27279 11.7883 8.71925 12.3408 8.03642 12.3408C7.35359 12.3408 6.80005 11.7883 6.80005 11.1067C6.80005 10.4252 7.35359 9.87264 8.03642 9.87264C8.71925 9.87264 9.27279 10.4252 9.27279 11.1067ZM12.9819 12.3408C13.6647 12.3408 14.2183 11.7883 14.2183 11.1067C14.2183 10.4252 13.6647 9.87264 12.9819 9.87264C12.2991 9.87264 11.7455 10.4252 11.7455 11.1067C11.7455 11.7883 12.2991 12.3408 12.9819 12.3408Z" fill={theme.extend.colors.primary.DEFAULT} />
+                            </Svg>
+                        </View> : <></>
+                    }
+                    {
+                        hasNotPaidInvoice ? <View className="items-center justify-center h-[40px] w-[40px] rounded-full bg-red/20  ">
+                            <Svg width="4" height="20" viewBox="0 0 2 11" fill="none" >
+                                <Path d="M1 0.75V6" stroke={theme.extend.colors.red.DEFAULT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <Path d="M1 9.19995V9.29995" stroke={theme.extend.colors.red.DEFAULT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </Svg>
+
+                        </View> : <></>
+                    }
                     <View className="">
                         <Text className="font-jakarta-semibold text-[16px] text-dark dark:text-gray-100">{user?.role == "CLEANER" ? `#${order.orderId}` : format(order.executionDate, "dd MMMM", {
                             locale: fr
                         })}</Text>
                         <View className="flex-row items-center gap-x-2">
                             {
-                                (order.userKg ?? order.capacityKg) ?
+                                (order.userKg) ?
                                     <>
-                                        <Text className="text-dark-300 font-jakarta-medium dark:text-gray">{`${order.userKg ?? order.capacityKg}/kg`}</Text>
+                                        <Text className="text-dark-300 font-jakarta-medium dark:text-gray">{`${order.userKg}/kg`}</Text>
                                         <View className="w-[3px] h-[3px] rounded-full bg-dark-300 dark:bg-gray"></View>
                                     </>
                                     :
@@ -182,16 +195,16 @@ export const HistoryItem = ({ order }: IHistoryItem) => {
                                 user?.role == "CLEANER" ?
                                     `${order.pickingHours[0]}`
                                     :
-                                    `${order.orderType == "SUBSCRIPTION" ? t("Abonnement",{
-                                        
-                                    }) : t("Commande")}/kg`
+                                    `${order.orderType == "SUBSCRIPTION" ? t("Abonnement", {
+
+                                    }) : t("Commande")}`
                             }</Text>
                         </View>
                     </View>
                 </View>
                 <View className="flex-row gap-x-4 items-center">
                     {
-                        (user?.role) == "CLEANER" && ["SHIPPING_FAST", "SHIPPING_PRIORITIZED"].includes(order.deliveryType) && order.status!="DELIVERED" ? (
+                        (user?.role) == "CLEANER" && ["SHIPPING_FAST", "SHIPPING_PRIORITIZED"].includes(order.deliveryType) && order.status != "DELIVERED" ? (
                             <PrioritShipping contained={false} title={"Urgent~" + order.executionDuration + "h"} />
                         ) : <></>
                     }
@@ -248,7 +261,7 @@ export function StatusItem({ order, contained = false }: IHistoryItem) {
             } else if (isSameDay(date, afterTomorrow)) {
                 title = t("Après-demain")
             } else {
-                title=t("Bientôt")
+                title = t("Bientôt")
                 // title = capitalize(format(order.executionDate, "dd EEEE", {
                 //     locale: fr
                 // }))
@@ -300,8 +313,8 @@ export function StatusItem({ order, contained = false }: IHistoryItem) {
             <View className={clx("flex-row items-center gap-x-2 px-1.5 py-1 rounded-[5px] ", !contained ? "bg-red/10 dark:bg-red-500/10" : "bg-red dark:bg-red-500")}>
                 <View>
                     <Svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                        <Path d="M10.5 3.5L3.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} stroke-linecap="round" stroke-linejoin="round" />
-                        <Path d="M3.5 3.5L10.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} stroke-linecap="round" stroke-linejoin="round" />
+                        <Path d="M10.5 3.5L3.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeLinecap="round" strokeLinejoin="round" />
+                        <Path d="M3.5 3.5L10.5 10.5" stroke={colorScheme == "light" ? theme.extend.colors.red.DEFAULT : theme.extend.colors.red[500]} strokeLinecap="round" strokeLinejoin="round" />
                     </Svg>
 
                 </View>

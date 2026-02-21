@@ -3,16 +3,24 @@ import { ProfileImage } from "@/components/ProfileImage";
 import { Text } from "@/components/Themed";
 import { capitalize } from "@/helpler";
 import { useStore } from "@/store/store";
+import { router } from "expo-router";
 import { t } from "i18next";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
 export function Profile() {
     const user = useStore(s => s.user)
-    const {bottom}=useSafeAreaInsets()
+    const { bottom } = useSafeAreaInsets()
+    const setUser = useStore((s) => s.setUser);
+    const setToken = useStore((s) => s.setToken);
+    const handlePress = () => {
+        router.dismissTo("/auth/otp-verification")
+        setUser(null as any)
+        setToken(null as any)
+    }
     return (
-        <View className="gap-y-2 items-center p-6 flex-1 bg-white dark:bg-dark-bg" style={{paddingBottom:bottom}}>
+        <View className="gap-y-2 items-center p-6 flex-1 bg-white dark:bg-dark-bg" style={{ paddingBottom: bottom }}>
             <View className="flex-1 justify-center">
                 <View className="items-center">
                     <ProfileImage
@@ -26,7 +34,9 @@ export function Profile() {
                     <Text className="font-jakarta text-[14px] text-dark-300 text-center dark:text-gray-200">{t("Profitez d’une expérience fluide et innovante avec nous. Partagez votre avis pendant que nous préparons la suite pour vous.")}</Text>
                 </View>
                 <View>
-                    <Button.Primary fullwidth={false}>
+                    <Button.Primary onPress={()=>{
+                        
+                    }} fullwidth={false}>
                         <View>
                             <View className="flex-row items-center gap-x-4">
                                 <Svg width="21" height="20" viewBox="0 0 21 20" fill="none" >
@@ -37,6 +47,19 @@ export function Profile() {
                             </View>
                         </View>
                     </Button.Primary>
+                </View>
+                <View className="mt-6 flex-row items-center justify-center">
+                    <TouchableOpacity onPress={handlePress} className="flex-row items-center gap-x-4">
+                        <View className="w-[40px] h-[40px] rounded-full justify-center items-center bg-red-500/20">
+                            <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <Path d="M7.4165 6.30001C7.67484 3.30001 9.2165 2.07501 12.5915 2.07501H12.6998C16.4248 2.07501 17.9165 3.56668 17.9165 7.29168V12.725C17.9165 16.45 16.4248 17.9417 12.6998 17.9417H12.5915C9.2415 17.9417 7.69984 16.7333 7.42484 13.7833" stroke="#EB5757" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <Path d="M12.4999 10H3.0166" stroke="#EB5757" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <Path d="M4.87516 7.20831L2.0835 9.99998L4.87516 12.7916" stroke="#EB5757" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </Svg>
+
+                        </View>
+                        <Text className="font-jakarta-medium text-[14px] text-red-500">{t("Deconnexion")}</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </View>

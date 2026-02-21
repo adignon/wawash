@@ -48,6 +48,7 @@ export function SubscriptionForm() {
         weekDayPicking: defaultDaysValues,
         prefereredShipping: "SHIPPING_DEFAULT",
         dryingAddon: false,
+        weeks: [1, 2, 3, 4 ],
         autoRenew: false,
         dateSelected: format(addDays(new Date, 1), "yyyy-MM-dd")
     })
@@ -60,7 +61,7 @@ export function SubscriptionForm() {
     })
 
 
-    const NUMBER_OF_WEEK = params.unique ? 1 : 4
+    const NUMBER_OF_WEEK = params.unique ? 1 : form.weeks.length
     const [command, setCommand] = React.useState<ICommand | null>(null)
     const commandSavedData = React.useRef<ICommand | null>(null)
     const { totalToPay, dryingPrice, shippingPrice } = useMemo(() => {
@@ -139,8 +140,6 @@ export function SubscriptionForm() {
         }
     }
 
-
-
     const currentDayData = form.weekDayPicking.find((d) => d[0] == activeDay)
 
     const mutation = useMutation({
@@ -186,11 +185,11 @@ export function SubscriptionForm() {
     }
     const totalKg = useMemo(() => (params?.kg) ? Number(params.kg) * NUMBER_OF_WEEK : 'total ', [params?.kg])
     const { user, setUser } = useStore(s => s)
-    const updateUser=(command:ICommand)=>{
-         if ( command?.invoice.status == "SUCCESS" ) {
+    const updateUser = (command: ICommand) => {
+        if (command?.invoice.status == "SUCCESS") {
             setUser({
                 ...user,
-                activeSubscription: command 
+                activeSubscription: command
             } as any)
         }
     }
@@ -266,8 +265,8 @@ export function SubscriptionForm() {
         try {
             const data: IOrder = await commandMutation.mutateAsync({
                 ...values,
-                pickingDate:dateSelected+" 00:00:00",
-                hours:weekDayPicking[0][1]
+                pickingDate: dateSelected + " 00:00:00",
+                hours: weekDayPicking[0][1]
             })
             setOrder(data)
             return;
@@ -294,6 +293,20 @@ export function SubscriptionForm() {
                     <Header title={PackageDetail.name} />
                     <ScrollView className="px-5 mt-6 flex-1">
                         <Text className="font-jakarta-semibold text-[18px] text-primary-500">{t("Définissez vos préférences")}</Text>
+                        {
+                            !params.unique ? (
+                                <>
+                                    <View className="mt-8">
+                                        <Text className="mb-4 font-jakarta-semibold text-[16px]">{t("Semaines de collecte")}</Text>
+                                        <WeekSelector value={form.weeks} setValue={(value: (prev: number[]) => number[]) => setForm(prev => ({
+                                            ...prev, weeks: value(prev.weeks)
+                                        }))} />
+                                    </View>
+                                </>
+                            ) : <></>
+                        }
+
+
                         <View className="mt-8">
                             <Text className="mb-4 font-jakarta-semibold text-[16px]">{params.unique ? t("Date de collecte") : t("Collecte  hebdomadaire")}</Text>
                             {
@@ -327,7 +340,7 @@ export function SubscriptionForm() {
 
                                             label={
                                                 <View className="gap-y-1 -mt-2 ml-4">
-                                                    <Text className="text-[14px] font-jakarta-semibold text-dark">{t("Collecte multiple")}  {
+                                                    <Text className="text-[14px] font-jakarta-semibold text-dark">{t("Collecte multiple par semaine")}  {
                                                         Number(total) ? (
                                                             <Text className="text-[14px] text-primary dark:text-primary font-jakarta-semibold">{t("+({{total}}f)", {
                                                                 total,
@@ -351,6 +364,7 @@ export function SubscriptionForm() {
                                 </View>
                             ) : <></>
                         }
+
                         <View className="mt-12">
                             <Text className="mb-4 font-jakarta-semibold text-[16px]">{t("Option de livraison")}{Number(shippingPrice) > 0 ? <Text className=" font-jakarta-semibold text-primary dark:text-primary">  {`(+${shippingPrice}f`}<Text className=" font-jakarta-semibold text-primary dark:text-primary text-[12px]">{`/${(typeof (totalKg) == "number" && totalKg > 1) || typeof (totalKg) == "string" ? totalKg : ""}kg)`}</Text></Text> : <></>}</Text>
                         </View>
@@ -418,7 +432,7 @@ export function SubscriptionForm() {
                         }
                         <Button.Primary
                             loading={mutation.isPending || commandMutation.isPending}
-                            onPress={() =>params.unique ? handleSubmitUnique() : handleSubmit()}
+                            onPress={() => params.unique ? handleSubmitUnique() : handleSubmit()}
                             label={<Text className="font-jakarta-bold text-[16px] text-dark text-gray-100">{params.unique ? t("Commander") : t("Payer - {{total}}f", { total: totalToPay })}</Text>}
                         />
                     </View>
@@ -446,7 +460,7 @@ export function SubscriptionForm() {
                                 }
                             })
                         }
-                        
+
                         //router.dismissTo("/client/packages")
                     }}
                     onClose={() => {
@@ -472,6 +486,8 @@ export function SubscriptionForm() {
     }
 
 }
+
+
 interface IDaySelector {
     selected: number[],
     onSelect: (x: number) => void,
@@ -649,6 +665,49 @@ const HourSelector = ({ value, onSelect }: IHourSelector) => {
         </View>
     )
 }
+
+function WeekSelector({
+    value, setValue
+}: { value: number[], setValue: (value: ((prev: number[]) => number[])) => void }) {
+    const weeks = [1, 2, 3, 4]
+    const handlePress = (value: number) => {
+        setValue((prev) => {
+            let values: number[] = []
+            if (prev.includes(value)) {
+                values = prev.filter(p => p != value)
+            } else {
+                values = Array.from(new Set([...prev, value].sort((a, b) => a - b)))
+            }
+            if (values.length < 2) {
+                Alert.alert(t("Vous devez selectionner au moins 2 semaines pour vous abonner."))
+                return prev
+            } else {
+                return values
+            }
+
+        })
+    }
+    return (
+        <ScrollView horizontal className="">
+            {
+                weeks.map(w => (
+                    <TouchableOpacity onPress={() => handlePress(w)} key={w} className={clx("w-[70px] h-[70px] gap-y-2 items-center justify-center rounded-full border  mr-6", value.includes(w) ? "bg-primary border-primary" : "border-gray-300 dark:border-gray-200")}>
+                        <View className=" justify-center">
+                            <View>
+                                <Text className={clx("font-jakarta-medium text-[12px] ", value.includes(w) ? "text-gray-100 dark:text-gray-100" : "text-dark-300 dark:text-gray-200")}>{t("Sem")}</Text>
+                            </View>
+                            <View>
+                                <Text className={clx("text-center font-jakarta-bold text-[18px] ", value.includes(w) ? "text-white dark:text-white" : "text-dark-300 dark:text-gray-200")}>{w}</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                ))
+            }
+
+        </ScrollView >
+    )
+}
+
 interface IShippingOptions {
     options: { [x: string]: IServiceMeta },
     onSelect: (id: string) => void,
@@ -695,9 +754,9 @@ export const ShippingOptions = ({ options, params, onSelect, value }: IShippingO
                 <View className="flex-1 flex-row">
                     <ShippingOption onSelect={onSelect} option={options.shipping_fast} isActive={options.shipping_fast.code == value} icon={ICONS.shipping_fast} />
                 </View>
-                {/* <View className="flex-1 flex-row">
+                <View className="flex-1 flex-row">
                     <ShippingOption onSelect={onSelect} option={options.shipping_prioritized} isActive={options.shipping_prioritized.code == value} icon={ICONS.shipping_prioritized} />
-                </View> */}
+                </View>
             </View>
         </View>
     )
@@ -773,7 +832,7 @@ export const PaymentModal = ({
     onResult?: (x: any) => void,
     open: boolean,
     onClose: () => void,
-    status?: "pending" | "success" | "failed"|"created",
+    status?: "pending" | "success" | "failed" | "created",
     params?: any
 }) => {
     const { t } = useTranslation()
@@ -794,7 +853,7 @@ export const PaymentModal = ({
                     </TouchableOpacity>
                 </View>
                 {
-                    status == "pending" || status=="created" ? (
+                    status == "pending" || status == "created" ? (
                         <>
                             <View className="flex-1 justify-end mt-15">
                                 <View style={{ borderRadius: 100, width: 130, height: 130, justifyContent: "center", alignItems: "center" }} className="bg-yellow-100 dark:bg-yellow-dark-300">

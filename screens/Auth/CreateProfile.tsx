@@ -117,7 +117,7 @@ export function CreateProfile() {
     }
     return (
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 bg-white dark:bg-dark-bg">
-            <SafeView safeZone="bottom" className="bg-light   flex-1">
+            <SafeView safeZone="bottom" className="bg-light  dark:bg-dark-bg flex-1">
                 <Header title={t("Créer votre profile")} />
                 <ScrollView className="flex-1">
                     <View className="mx-auto mt-6">

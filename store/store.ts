@@ -9,7 +9,9 @@ type AuthState = {
     accessToken: string | null,
     user: User | null;
     address: IAddress | null,
-    setAddress:(x:IAddress)=>void
+    color:"light"|"dark"|"default",
+    setAddress:(x:IAddress)=>void,
+    setColor: (color:"light"|"dark"|"default") =>void,
     clearAddress:() => void;
     setToken: (token: string) => void;
     clearToken: () => void;
@@ -23,6 +25,8 @@ export const useStore = create<AuthState>()(
             user: null,
             accessToken: null,
             address:null,
+            color:"default",
+            setColor: (color:"light"|"dark"|"default") => set({ color: color }),
             setAddress: (address:any) => set({ address }),
             clearAddress: () => set({ address: null }),
             setToken: (accessToken) => set({ accessToken }),

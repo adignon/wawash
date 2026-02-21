@@ -5,7 +5,7 @@ import { TouchableOpacity, View } from "react-native";
 import { Path, Svg } from "react-native-svg";
 export function OtpVerifyCode() {
     const { phone, retryAt, token } = useLocalSearchParams<{ token: string, phone: string, retryAt: string }>()
-    const setUser = useStore((s) => s.setUser);
+    
     const handleRetry = async () => {
         try {
             const data = await otpVerify({
@@ -32,6 +32,7 @@ export function OtpVerifyCode() {
 
         }
     }
+    const setUser = useStore((s) => s.setUser);
     const setToken = useStore((s) => s.setToken);
     const handleSubmit = async (code: string) => {
         try {
